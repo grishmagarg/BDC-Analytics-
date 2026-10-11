@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Credit BDC Analytics Suite</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+:root {
+  --navy: #f4f6f9;
+  --navy1: #ffffff;
+  --navy2: #eef2f7;
+  --navy3: #b9c6d6;
+  --border: #dce3ec;
+  --amber: #b45309;
+  --amber2: #92400e;
+  --sky: #0369a1;
+  --green: #15803d;
+  --red: #b91c1c;
+  --purple: #6d28d9;
+  --teal: #0f766e;
+  --pink: #be123c;
+  --muted: #6b7f94;
+  --text: #1f2d3d;
+  --text2: #52657a;
+  --white: #0b1725;
+  --panel2: #f8fafc;
+  --headbg: #eef2f7;
+  --oncolor: #ffffff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; line-height: 1.5; }
+.upload-panel, .selectors-panel, .table-wrap, .howto, .chart-card, .chart-controls-panel, .chart-tbl-wrap, .card { box-shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--navy2); }
+::-webkit-scrollbar-thumb { background: #aebdd0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--amber); }
+.header {
+  background: linear-gradient(135deg, #ffffff 0%, #eef3f9 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--amber), var(--amber2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.header-title { font-size: 16px; font-weight: 700; color: var(--white); letter-spacing: -0.3px; }
+.header-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.header-badge { background: rgba(180,83,9,0.10); border: 1px solid rgba(180,83,9,0.28); color: var(--amber); font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase; }
+.status-pill { font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 12px; border-radius: 20px; background: rgba(15,30,50,0.04); border: 1px solid var(--border); color: var(--muted); transition: all 0.3s; }
+.status-pill.ready { background: rgba(21,128,61,0.10); border-color: rgba(21,128,61,0.28); color: var(--green); }
+.main { max-width: 1600px; margin: 0 auto; padding: 24px 32px; }
+.section-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.section-label .label-badge { background: rgba(180,83,9,0.09); color: var(--amber); border: 1px solid rgba(180,83,9,0.2); border-radius: 3px; padding: 1px 7px; font-size: 9px; letter-spacing: 1px; }
+.upload-panel { background: var(--navy1); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 24px; }
+.quarter-upload-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+@media (max-width: 1100px) { .quarter-upload-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .quarter-upload-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+.q-card { border-radius: 10px; padding: 14px; border: 1px solid var(--border); background: var(--panel2); transition: border-color 0.2s; }
+.q-card:hover { border-color: var(--navy3); }
+@media (max-width: 480px) {
+  .q-card { padding: 10px 8px; }
+  .drop-zone { padding: 12px 6px; }
+  .drop-icon { font-size: 16px; margin-bottom: 3px; }
+  .drop-text { font-size: 10px; }
+  .drop-sub { font-size: 8px; }
+  .q-label-input { font-size: 10px; padding: 5px 8px; }
+  .upload-panel { padding: 14px 12px; }
+}
+.q-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.q-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 8px; border-radius: 12px; }
+.q-badge-1 { background: rgba(180,83,9,0.10); color: var(--amber); border: 1px solid rgba(180,83,9,0.24); }
+.q-badge-2 { background: rgba(3,105,161,0.09); color: var(--sky); border: 1px solid rgba(3,105,161,0.22); }
+.q-badge-3 { background: rgba(109,40,217,0.09); color: var(--purple); border: 1px solid rgba(109,40,217,0.22); }
+.q-badge-4 { background: rgba(15,118,110,0.09); color: var(--teal); border: 1px solid rgba(15,118,110,0.22); }
+.q-optional { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-left: auto; }
+.drop-zone { border: 1.5px dashed var(--border); border-radius: 8px; padding: 18px 12px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+.drop-zone:hover, .drop-zone.drag { border-color: var(--amber); background: rgba(180,83,9,0.04); }
+.drop-zone input[type=file] { position: absolute; opacity: 0; width: 1px; height: 1px; top: 0; left: 0; pointer-events: none; }
+.drop-zone label { position: absolute; inset: 0; cursor: pointer; z-index: 1; }
+.drop-zone-content { position: relative; z-index: 2; pointer-events: none; }
+.drop-icon { font-size: 20px; margin-bottom: 5px; color: var(--border); }
+.drop-text { font-size: 11px; color: var(--muted); }
+.drop-text span { color: var(--amber); text-decoration: underline; }
+.drop-sub { font-size: 9px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.file-ok { display: flex; align-items: center; gap: 6px; }
+.file-ok-icon { color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; }
+.file-ok-name { font-size: 11px; color: var(--white); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-ok-meta { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 4px; }
+.q-label-input { margin-top: 8px; background: var(--navy1); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; width: 100%; outline: none; transition: border-color 0.2s; }
+.q-label-input:focus { border-color: var(--amber); }
+.q-label-input::placeholder { color: var(--muted); }
+.btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn-scan { background: linear-gradient(135deg, var(--sky), #0ea5e9); color: var(--oncolor); border: none; border-radius: 8px; padding: 10px 24px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.5px; transition: all 0.2s; display: flex; align-items: center; gap: 7px; }
+.btn-scan:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(3,105,161,0.25); }
+.btn-scan:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-analyze { background: linear-gradient(135deg, var(--amber), var(--amber2)); color: var(--oncolor); border: none; border-radius: 10px; padding: 12px 36px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+.btn-analyze:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(180,83,9,0.28); }
+.btn-analyze:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-export { background: transparent; border: 1px solid var(--amber); color: var(--amber); border-radius: 8px; padding: 8px 20px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; transition: all 0.2s; }
+.btn-export:hover { background: rgba(180,83,9,0.09); }
+.btn-secondary { background: transparent; border: 1px solid var(--sky); color: var(--sky); border-radius: 8px; padding: 8px 18px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px; transition: all 0.2s; }
+.btn-secondary:hover { background: rgba(3,105,161,0.07); }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 8px 18px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px; transition: all 0.2s; }
+.btn-ghost:hover { border-color: var(--navy3); color: var(--text); }
+.btn-template { background: transparent; border: 1px solid var(--border); color: var(--text2); border-radius: 8px; padding: 8px 16px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 11px; transition: all 0.2s; }
+.btn-template:hover { border-color: var(--sky); color: var(--sky); }
+.log-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--amber); padding: 4px 0; display: none; }
+.log-msg.visible { display: block; }
+.log-msg.error { color: var(--red); }
+.tab-nav { display: flex; gap: 4px; margin-bottom: 24px; background: var(--navy1); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: 100%; flex-wrap: wrap; }
+.tab-btn { background: none; border: 1px solid transparent; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; padding: 8px 22px; border-radius: 7px; cursor: pointer; transition: all 0.2s; flex: 1; text-align: center; white-space: nowrap; }
+@media (max-width: 600px) { .tab-btn { font-size: 9px; padding: 8px 10px; letter-spacing: 0.4px; } }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { background: rgba(180,83,9,0.10); color: var(--amber); border-color: rgba(180,83,9,0.24); }
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+.selectors-panel { background: var(--navy1); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 20px; }
+.selectors-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 1100px) { .selectors-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 700px) { .selectors-grid { grid-template-columns: repeat(2, 1fr); } }
+.fund-select-wrap { display: flex; flex-direction: column; gap: 6px; }
+.fund-select-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+.fund-dot-sm { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.fund-select {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: var(--white);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7f94' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+.fund-select:focus { border-color: var(--amber); }
+.fund-select.has-value { border-color: var(--navy3); }
+.fund-select option { background: var(--panel2); color: var(--white); }
+.fund-select-count { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
+.primary-q-row { display: flex; align-items: center; gap: 16px; padding-top: 14px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.primary-q-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); letter-spacing: 0.8px; white-space: nowrap; }
+.primary-q-select {
+  background: var(--panel2);
+  border: 1px solid var(--amber);
+  border-radius: 7px;
+  padding: 7px 32px 7px 12px;
+  color: var(--amber);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b45309' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  min-width: 160px;
+}
+.primary-q-select option { background: var(--panel2); color: var(--white); }
+.primary-q-hint { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 12px; margin-bottom: 24px; }
+.card { background: var(--navy1); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; border-top: 2px solid var(--amber); }
+.card-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.card-value { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--amber); }
+.card-sub { font-size: 10px; color: var(--muted); margin-top: 4px; }
+.results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.results-title { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--amber); letter-spacing: 0.5px; }
+.table-wrap { background: var(--navy1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+.table-controls { padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.table-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 0.8px; text-transform: uppercase; }
+.filter-input { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; outline: none; width: 220px; margin-left: auto; transition: border-color 0.2s; }
+.filter-input:focus { border-color: var(--amber); }
+.filter-input::placeholder { color: var(--muted); }
+.tbl-scroll { overflow-x: auto; max-height: 580px; }
+table { border-collapse: collapse; width: 100%; font-family: 'DM Mono', monospace; font-size: 11px; }
+thead th { background: var(--headbg); color: var(--muted); font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 9px 12px; position: sticky; top: 0; z-index: 5; white-space: nowrap; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; transition: color 0.15s; }
+thead th:hover { color: var(--amber); }
+.th-fund { border-left: 2px solid var(--border); text-align: center; }
+tbody tr { border-bottom: 1px solid rgba(15,30,50,0.07); transition: background 0.1s; }
+tbody tr:hover { background: rgba(180,83,9,0.04); }
+tbody tr.all-funds { background: rgba(180,83,9,0.06); }
+tbody tr.all-funds:hover { background: rgba(180,83,9,0.08); }
+tbody td { padding: 8px 12px; color: var(--text); vertical-align: middle; white-space: nowrap; }
+td.num { text-align: right; }
+td.company-cell { min-width: 220px; white-space: normal; font-size: 11px; color: var(--white); font-weight: 500; }
+td.industry-cell { min-width: 130px; white-space: normal; color: var(--text2); font-size: 10px; }
+td.fund-border { border-left: 2px solid var(--border); }
+.all-badge { display: inline-block; background: rgba(180,83,9,0.13); color: var(--amber); font-size: 8px; padding: 1px 5px; border-radius: 3px; margin-left: 6px; vertical-align: middle; letter-spacing: 0.8px; }
+.fv-par { color: var(--text2); }
+.fv-par.stressed { color: var(--pink); font-weight: 600; }
+.fv-par.watch { color: var(--amber); }
+.fv-par.ok { color: var(--green); }
+.trend-fund-block { margin-bottom: 32px; }
+.trend-fund-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.trend-fund-name { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--white); }
+.trend-fund-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.trend-count-badge { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); background: var(--panel2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 3px; }
+.trend-avg-row { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-left: auto; }
+.delta-up { color: var(--green) !important; font-weight: 600; }
+.delta-down { color: var(--pink) !important; font-weight: 600; }
+.delta-flat { color: var(--muted) !important; }
+.trend-cell-ok { color: var(--green) !important; }
+.trend-cell-watch { color: var(--amber) !important; }
+.trend-cell-stressed { color: var(--pink) !important; font-weight: 600; }
+.trend-cell-na { color: var(--muted) !important; }
+tbody tr.avg-row { background: rgba(15,30,50,0.05); border-top: 1px solid var(--border); }
+tbody tr.avg-row td { font-style: italic; color: var(--text2); }
+.hidden { display: none !important; }
+#results-section { display: none; }
+#trend-results-wrap { display: none; }
+.footnote { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.7; }
+.howto { background: var(--navy1); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 24px; overflow: hidden; }
+.howto-toggle { width: 100%; background: none; border: none; cursor: pointer; padding: 13px 20px; display: flex; align-items: center; justify-content: space-between; color: var(--amber); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; transition: background 0.2s; }
+.howto-toggle:hover { background: rgba(180,83,9,0.04); }
+.howto-body { padding: 0 20px 20px; display: none; }
+.howto-body.open { display: block; }
+.howto-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 14px; }
+.howto-step { background: var(--panel2); border-radius: 8px; padding: 13px 15px; border-left: 3px solid var(--amber); }
+.howto-step.sky { border-left-color: var(--sky); }
+.howto-step.purple { border-left-color: var(--purple); }
+.howto-step.teal { border-left-color: var(--teal); }
+.step-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 0.8px; margin-bottom: 5px; }
+.step-label.sky { color: var(--sky); }
+.step-label.purple { color: var(--purple); }
+.step-label.teal { color: var(--teal); }
+.howto-step p { font-size: 11px; color: var(--text2); line-height: 1.7; }
+.howto-step code { font-family: 'DM Mono', monospace; color: var(--white); background: rgba(15,30,50,0.07); padding: 1px 5px; border-radius: 3px; font-size: 10px; }
+.chart-layout { display: grid; grid-template-columns: 280px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .chart-layout { grid-template-columns: 1fr; } }
+.chart-controls-panel { background: var(--navy1); border: 1px solid var(--border); border-radius: 12px; padding: 16px; position: sticky; top: 80px; }
+.ctrl-section-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.ctrl-section-lbl::after { content:''; flex:1; height:1px; background: var(--border); }
+.company-search-wrap { position: relative; margin-bottom: 6px; }
+.company-search { width: 100%; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px 7px 28px; color: var(--white); font-family: 'DM Mono', monospace; font-size: 10px; outline: none; transition: border-color 0.2s; }
+.company-search:focus { border-color: var(--amber); }
+.company-search::placeholder { color: var(--muted); }
+.search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); pointer-events: none; }
+.company-listbox { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; margin-bottom: 14px; }
+.company-option { padding: 7px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); cursor: pointer; transition: background 0.1s; border-bottom: 1px solid rgba(15,30,50,0.07); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.company-option:last-child { border-bottom: none; }
+.company-option:hover { background: rgba(180,83,9,0.06); color: var(--text); }
+.company-option.selected { background: rgba(180,83,9,0.10); color: var(--amber); }
+.company-option.hidden { display: none; }
+.fund-cb-list { display: flex; flex-direction: column; gap: 5px; max-height: 320px; overflow-y: auto; padding-right: 2px; margin-bottom: 14px; }
+.fund-cb-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel2); cursor: pointer; transition: all 0.15s; user-select: none; }
+.fund-cb-row:hover { border-color: var(--navy3); }
+.fund-cb-row.checked { border-color: var(--fcol, var(--amber)); background: rgba(180,83,9,0.06); }
+.fund-cb-row input[type=checkbox] { display: none; }
+.fund-cb-box { width: 13px; height: 13px; border-radius: 3px; border: 1.5px solid var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; font-size: 8px; }
+.fund-cb-row.checked .fund-cb-box { border-color: var(--fcol, var(--amber)); background: var(--fcol, var(--amber)); color: var(--oncolor); }
+.fund-cb-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text2); line-height: 1.3; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fund-cb-row.checked .fund-cb-lbl { color: var(--white); }
+.fund-cb-row.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.fund-sel-info { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 12px; }
+.btn-plot { width: 100%; background: linear-gradient(135deg, var(--amber), var(--amber2)); color: var(--oncolor); border: none; border-radius: 8px; padding: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; transition: all 0.2s; }
+.btn-plot:hover:not(:disabled) { box-shadow: 0 4px 18px rgba(180,83,9,0.28); }
+.btn-plot:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-clear-chart { width: 100%; margin-top: 6px; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 8px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; transition: all 0.15s; }
+.btn-clear-chart:hover { border-color: var(--red); color: var(--red); }
+.chart-main-panel { display: flex; flex-direction: column; gap: 18px; }
+.chart-card { background: var(--navy1); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.chart-card-title { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--amber); letter-spacing: 0.5px; margin-bottom: 4px; }
+.chart-card-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); margin-bottom: 16px; }
+.chart-empty { display: flex; align-items: center; justify-content: center; height: 280px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.5px; border: 1.5px dashed var(--border); border-radius: 8px; }
+.chart-wrap { position: relative; height: 360px; }
+.chart-tbl-wrap { background: var(--navy1); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.chart-tbl-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.chart-tbl-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--amber); letter-spacing: 0.8px; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.fade-up { animation: fadeUp 0.3s ease forwards; }
+
+/* ── Fund picker grid (Overlap Matrices / Level 3 Debt) ── */
+.picker-panel { background: var(--navy1); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(16,24,40,0.06); }
+.picker-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.chip-btn { background: var(--panel2); border: 1px solid var(--border); color: var(--text2); border-radius: 7px; padding: 6px 14px; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .4px; transition: all .15s; }
+.chip-btn:hover { border-color: var(--sky); color: var(--sky); }
+.chip-btn.on { background: rgba(180,83,9,0.10); border-color: rgba(180,83,9,0.35); color: var(--amber); }
+.picker-search { background: var(--panel2); border: 1px solid var(--border); border-radius: 7px; padding: 6px 12px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; outline: none; width: 200px; }
+.picker-search:focus { border-color: var(--amber); }
+.picker-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
+.fund-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 7px; max-height: 300px; overflow-y: auto; padding: 4px; border: 1px solid var(--border); border-radius: 10px; background: var(--panel2); }
+.fg-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--navy1); cursor: pointer; transition: all .13s; user-select: none; }
+.fg-item:hover { border-color: var(--navy3); }
+.fg-item.on { border-color: var(--sky); background: rgba(3,105,161,0.06); }
+.fg-item.hidden { display: none; }
+.fg-box { width: 13px; height: 13px; border-radius: 3px; border: 1.5px solid var(--navy3); flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-size: 9px; color: #fff; }
+.fg-item.on .fg-box { background: var(--sky); border-color: var(--sky); }
+.fg-lbl { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text2); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fg-item.on .fg-lbl { color: var(--white); }
+.picker-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin: 16px 0 9px; }
+.q-chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.q-chip { display:flex; align-items:center; gap:7px; padding: 7px 14px; border: 1px solid var(--border); border-radius: 7px; background: var(--panel2); cursor:pointer; font-family:'DM Mono',monospace; font-size:10px; color: var(--text2); transition: all .13s; user-select:none; }
+.q-chip.on { border-color: var(--sky); background: rgba(3,105,161,0.07); color: var(--white); }
+.q-chip .fg-box { width:12px; height:12px; }
+.q-chip.on .fg-box { background: var(--sky); border-color: var(--sky); }
+.band-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.band-pill { display:flex; align-items:center; gap:4px; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; }
+.band-input { width: 46px; background: transparent; border: none; outline: none; color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; text-align: center; }
+.band-unit { font-family:'DM Mono',monospace; font-size: 10px; color: var(--muted); }
+.band-x { cursor: pointer; color: var(--muted); font-size: 12px; padding: 0 2px; line-height:1; }
+.band-x:hover { color: var(--red); }
+.btn-run { background: linear-gradient(135deg, #1d4ed8, #1e40af); color: #fff; border: none; border-radius: 9px; padding: 11px 28px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; transition: all .2s; }
+.btn-run:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(29,78,216,0.28); }
+.btn-run:disabled { opacity: .35; cursor: not-allowed; transform:none; }
+/* ── Matrices ── */
+.mx-block { margin-bottom: 26px; }
+.mx-title { font-family:'DM Mono',monospace; font-size: 11px; color: var(--sky); letter-spacing: .8px; margin-bottom: 9px; }
+.mx-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--navy1); }
+table.mx { border-collapse: collapse; font-family:'DM Mono',monospace; font-size: 10px; width: 100%; }
+table.mx th, table.mx td { padding: 6px 9px; text-align: center; white-space: nowrap; border-right: 1px solid rgba(255,255,255,.65); border-bottom: 1px solid rgba(255,255,255,.65); }
+table.mx thead th { background: var(--headbg); color: var(--text2); font-weight: 500; font-size: 9px; letter-spacing: .5px; position: sticky; top: 0; z-index: 3; border-bottom: 1px solid var(--border); }
+table.mx tbody th { background: var(--navy1); color: var(--white); text-align: left; font-weight: 500; position: sticky; left: 0; z-index: 2; border-right: 1px solid var(--border); min-width: 130px; }
+table.mx td.diag { background: #fbfdff !important; color: var(--muted); }
+.mx-note { font-family:'DM Mono',monospace; font-size: 10px; color: var(--muted); margin-top: 10px; }
+/* ── Level 3 table ── */
+table.l3 { border-collapse: collapse; font-family:'DM Mono',monospace; font-size: 11px; width: 100%; }
+table.l3 th, table.l3 td { padding: 8px 14px; white-space: nowrap; }
+table.l3 thead th { background: var(--headbg); color: var(--text2); font-size: 9px; font-weight: 500; letter-spacing: .9px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+table.l3 thead tr.grp th { text-align: right; border-left: 2px solid var(--border); color: var(--amber); }
+table.l3 tbody td { text-align: right; color: var(--text); border-bottom: 1px solid rgba(15,30,50,0.06); }
+table.l3 tbody td.fundcell { text-align: left; color: var(--white); font-weight: 500; }
+table.l3 td.grpstart { border-left: 2px solid var(--border); }
+table.l3 tbody tr:hover { background: rgba(3,105,161,0.04); }
+
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">⬡</div>
+  <div>
+    <div class="header-title">Private Credit BDC Analytics Suite</div>
+    <div class="header-sub">SCHEDULE OF INVESTMENTS · OVERLAP MATRICES · LEVEL 3 DEBT · PRICING TRENDS</div>
+  </div>
+  <div class="header-right">
+    <span class="status-pill" id="status-pill">No files loaded</span>
+    <span class="header-badge">Client-Side Only</span>
+  </div>
+</header>
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="section-label">
+    Step 1 — Upload Quarterly SOI Files
+    <span class="label-badge">UP TO 4 QUARTERS</span>
+  </div>
+  <div class="upload-panel">
+    <div class="quarter-upload-grid">
+      <!-- Q1 -->
+      <div class="q-card">
+        <div class="q-card-head">
+          <span class="q-badge q-badge-1">Quarter 1</span>
+          <span class="q-optional" id="q0-status">Not loaded</span>
+        </div>
+        <div class="drop-zone" id="dz-0" ondragover="dzOver(event,0)" ondragleave="dzLeave(0)" ondrop="dzDrop(event,0)">
+          <input type="file" id="fi-0" accept=".xlsx,.xls,.csv" onchange="dzChange(event,0)">
+          <label for="fi-0"></label>
+          <div class="drop-zone-content" id="dzc-0">
+            <div class="drop-icon">↑</div>
+            <div class="drop-text">Drop file or <span>browse</span></div>
+            <div class="drop-sub">XLSX · XLS · CSV</div>
+          </div>
+        </div>
+        <input class="q-label-input" id="ql-0" placeholder="Quarter label e.g. Q3 2024" value="">
+      </div>
+      <!-- Q2 -->
+      <div class="q-card">
+        <div class="q-card-head">
+          <span class="q-badge q-badge-2">Quarter 2</span>
+          <span class="q-optional" id="q1-status">Not loaded</span>
+        </div>
+        <div class="drop-zone" id="dz-1" ondragover="dzOver(event,1)" ondragleave="dzLeave(1)" ondrop="dzDrop(event,1)">
+          <input type="file" id="fi-1" accept=".xlsx,.xls,.csv" onchange="dzChange(event,1)">
+          <label for="fi-1"></label>
+          <div class="drop-zone-content" id="dzc-1">
+            <div class="drop-icon">↑</div>
+            <div class="drop-text">Drop file or <span>browse</span></div>
+            <div class="drop-sub">XLSX · XLS · CSV</div>
+          </div>
+        </div>
+        <input class="q-label-input" id="ql-1" placeholder="Quarter label e.g. Q4 2024" value="">
+      </div>
+      <!-- Q3 -->
+      <div class="q-card">
+        <div class="q-card-head">
+          <span class="q-badge q-badge-3">Quarter 3</span>
+          <span class="q-optional" id="q2-status">Optional</span>
+        </div>
+        <div class="drop-zone" id="dz-2" ondragover="dzOver(event,2)" ondragleave="dzLeave(2)" ondrop="dzDrop(event,2)">
+          <input type="file" id="fi-2" accept=".xlsx,.xls,.csv" onchange="dzChange(event,2)">
+          <label for="fi-2"></label>
+          <div class="drop-zone-content" id="dzc-2">
+            <div class="drop-icon">↑</div>
+            <div class="drop-text">Drop file or <span>browse</span></div>
+            <div class="drop-sub">XLSX · XLS · CSV</div>
+          </div>
+        </div>
+        <input class="q-label-input" id="ql-2" placeholder="Quarter label e.g. Q1 2025" value="">
+      </div>
+      <!-- Q4 -->
+      <div class="q-card">
+        <div class="q-card-head">
+          <span class="q-badge q-badge-4">Quarter 4</span>
+          <span class="q-optional" id="q3-status">Optional</span>
+        </div>
+        <div class="drop-zone" id="dz-3" ondragover="dzOver(event,3)" ondragleave="dzLeave(3)" ondrop="dzDrop(event,3)">
+          <input type="file" id="fi-3" accept=".xlsx,.xls,.csv" onchange="dzChange(event,3)">
+          <label for="fi-3"></label>
+          <div class="drop-zone-content" id="dzc-3">
+            <div class="drop-icon">↑</div>
+            <div class="drop-text">Drop file or <span>browse</span></div>
+            <div class="drop-sub">XLSX · XLS · CSV</div>
+          </div>
+        </div>
+        <input class="q-label-input" id="ql-3" placeholder="Quarter label e.g. Q2 2025" value="">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-scan" id="scan-btn" onclick="scanAllFiles()" disabled>⊙ Scan Files &amp; Detect Funds</button>
+      <button class="btn-template" onclick="downloadTemplate()">↓ Download Template</button>
+      <button class="btn-template" id="load-sample-btn" onclick="loadSampleData()" style="background:var(--blue);border-color:var(--blue);">Load Sample Data</button>
+      <div class="log-msg" id="scan-log"></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('overlap',this)">Overlap Analysis</button>
+    <button class="tab-btn" onclick="switchTab('matrices',this)">Overlap Matrices</button>
+    <button class="tab-btn" onclick="switchTab('level3',this)">Level 3 Debt</button>
+    <button class="tab-btn" onclick="switchTab('trend',this)">Pricing Trend</button>
+    <button class="tab-btn" onclick="switchTab('chart',this)">Valuation Chart</button>
+  </div>
+
+  <!-- TAB: OVERLAP -->
+  <div class="tab-pane active" id="tab-overlap">
+    <div class="howto">
+      <button class="howto-toggle" onclick="toggleHowto('ht-body-o','ht-arrow-o')">
+        <span>▸ How to Use — Overlap Analysis</span>
+        <span id="ht-arrow-o">▼</span>
+      </button>
+      <div class="howto-body" id="ht-body-o">
+        <div class="howto-grid">
+          <div class="howto-step">
+            <div class="step-label">Required Columns</div>
+            <p>Each Excel file must include: <code>BDC Name</code> · <code>Normalize Name</code> · <code>Industry</code> · <code>Par Amount ($M)</code> · <code>Cost ($M)</code> · <code>Fair Value ($M)</code>. One file can contain all 30+ BDCs — the tool splits by <code>BDC Name</code>.</p>
+          </div>
+          <div class="howto-step sky">
+            <div class="step-label sky">Workflow</div>
+            <p>1. Upload quarterly SOI files above. 2. Click <strong>Scan Files</strong> to detect all unique BDC names. 3. Use the 5 dropdowns to select which funds to compare. 4. Choose the <strong>Primary Quarter</strong> — overlap is computed from that quarter's data only. 5. Click <strong>Analyze Overlaps</strong>.</p>
+          </div>
+          <div class="howto-step purple">
+            <div class="step-label purple">Reading Results</div>
+            <p>Each row = a company held by ≥2 selected funds in the primary quarter. <span style="color:var(--pink)">Red FV/Par% &lt;90%</span> = stressed. <span style="color:var(--amber)">Amber 90–100%</span> = watch. <span style="color:var(--green)">Green &gt;100%</span> = premium/PIK. "ALL" badge = held by every selected fund.</p>
+          </div>
+          <div class="howto-step teal">
+            <div class="step-label teal">Pricing Trend Tab</div>
+            <p>After running overlap, switch to <strong>Pricing Trend</strong> — it uses the same fund selections and tracks FV/Par% for overlapping companies across all uploaded quarters. One table per fund, sortable by deterioration.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Step 2 — Select Funds &amp; Primary Quarter</div>
+    <div class="selectors-panel" id="selectors-panel">
+      <div class="selectors-grid" id="selectors-grid"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:14px;" id="sel-count-msg">
+        Upload and scan quarterly files to populate fund list.
+      </div>
+      <div class="primary-q-row">
+        <span class="primary-q-label">PRIMARY QUARTER FOR OVERLAP:</span>
+        <select class="primary-q-select" id="primary-q-select">
+          <option value="">— Upload files first —</option>
+        </select>
+        <span class="primary-q-hint">Overlap is computed from this quarter's data only</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap;">
+      <button class="btn-analyze" id="analyze-btn" onclick="runOverlapAnalysis()" disabled>⬛ Analyze Overlaps</button>
+      <div class="log-msg" id="analyze-log"></div>
+    </div>
+
+    <div id="results-section">
+      <div class="results-header">
+        <div class="results-title" id="results-title"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-secondary" onclick="switchTab('trend', document.querySelectorAll('.tab-btn')[1])">→ View Pricing Trends</button>
+          <button class="btn-export" onclick="exportOverlapExcel()">↓ Export to Excel</button>
+        </div>
+      </div>
+      <div class="cards-grid" id="cards-grid"></div>
+      <div class="table-wrap fade-up">
+        <div class="table-controls">
+          <span class="table-count" id="table-count"></span>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">
+            <input type="checkbox" id="filter-all-only" onchange="filterTable()" style="accent-color:var(--amber)">
+            ALL funds only
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">
+            <input type="checkbox" id="filter-stressed" onchange="filterTable()" style="accent-color:var(--pink)">
+            Stressed only
+          </label>
+          <input class="filter-input" id="filter-input" placeholder="Filter by company or industry…" oninput="filterTable()">
+        </div>
+        <div class="tbl-scroll">
+          <table id="result-table">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="footnote" id="footnote"></div>
+    </div>
+  </div>
+
+  <!-- TAB: TREND -->
+  <div class="tab-pane" id="tab-trend">
+    <div class="howto">
+      <button class="howto-toggle" onclick="toggleHowto('ht-body-t','ht-arrow-t')">
+        <span>▸ How to Use — Pricing Trend</span>
+        <span id="ht-arrow-t">▼</span>
+      </button>
+      <div class="howto-body" id="ht-body-t">
+        <div class="howto-grid">
+          <div class="howto-step teal">
+            <div class="step-label teal">What this shows</div>
+            <p>For each selected fund, one table tracks every company that overlaps with ≥1 other selected fund — showing its <strong>FV/Par%</strong> across all uploaded quarters. Identify marks drifting down, diverging between funds, or consistently stressed.</p>
+          </div>
+          <div class="howto-step sky">
+            <div class="step-label sky">Overlap universe</div>
+            <p>The overlap universe here is computed across <strong>all uploaded quarters</strong> (a company is included if it overlaps in any quarter). This gives a broader view than the single-quarter overlap in Tab 1.</p>
+          </div>
+          <div class="howto-step purple">
+            <div class="step-label purple">Reading the Δ column</div>
+            <p><strong>Δ Q1→Latest</strong> = change in FV/Par% from the first to the most recent quarter (in percentage points). <span style="color:var(--pink)">↓ negative</span> = deteriorating marks. <span style="color:var(--green)">↑ positive</span> = improving. Sorted stressed-first by default.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+      <button class="btn-analyze" id="run-trend-btn" onclick="runTrendAnalysis()" disabled>📈 Analyze Pricing Trend</button>
+      <div class="log-msg" id="trend-log"></div>
+    </div>
+    <div id="trend-results-wrap">
+      <div class="results-header">
+        <div class="results-title" id="trend-results-title"></div>
+        <button class="btn-export" onclick="exportTrendExcel()">↓ Export Trends to Excel</button>
+      </div>
+      <div class="cards-grid" id="trend-cards-grid"></div>
+      <div id="trend-tables-container"></div>
+      <div class="footnote" id="trend-footnote"></div>
+    </div>
+  </div>
+
+  <!-- TAB: CHART -->
+  <div class="tab-pane" id="tab-chart">
+    <div class="howto" style="margin-bottom:18px;">
+      <button class="howto-toggle" onclick="toggleHowto('ht-body-c','ht-arrow-c')">
+        <span>▸ How to Use — Valuation Chart</span>
+        <span id="ht-arrow-c">▼</span>
+      </button>
+      <div class="howto-body" id="ht-body-c">
+        <div class="howto-grid">
+          <div class="howto-step teal">
+            <div class="step-label teal">Purpose</div>
+            <p>Pick <strong>any one company</strong> and up to <strong>10 BDC funds</strong>. The line chart shows how each fund's FV/Par% for that company moves across the uploaded quarters. Great for spotting marking divergence across the market for a single credit.</p>
+          </div>
+          <div class="howto-step sky">
+            <div class="step-label sky">Company List</div>
+            <p>The company dropdown is populated from <strong>all uploaded quarterly files across all funds</strong> — fully independent of Overlap or Trend tabs. Type to search. Companies are de-duplicated by normalised name.</p>
+          </div>
+          <div class="howto-step purple">
+            <div class="step-label purple">Fund Selection</div>
+            <p>Select up to 10 funds using the checkboxes. Only funds that hold the selected company (in any quarter) will show a line. Funds with no data for that company are shown as gaps.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="chart-not-ready" style="background:var(--navy1);border:1px solid var(--border);border-radius:12px;padding:28px 24px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">
+      Upload quarterly files and click <strong style="color:var(--amber)">Scan Files &amp; Detect Funds</strong> above to enable this tab.
+    </div>
+    <div id="chart-ready-content" style="display:none;">
+      <div class="chart-layout">
+        <div class="chart-controls-panel">
+          <div class="ctrl-section-lbl">Company</div>
+          <div class="company-search-wrap">
+            <span class="search-icon">⌕</span>
+            <input class="company-search" id="co-search" placeholder="Search company…" oninput="filterCompanyList()">
+          </div>
+          <div class="company-listbox" id="co-listbox"></div>
+          <div class="ctrl-section-lbl">Funds <span id="chart-fund-count" style="font-size:9px;color:var(--muted);margin-left:4px;text-transform:none;letter-spacing:0">(0 / 10 selected)</span></div>
+          <div class="fund-sel-info" id="chart-fund-info">Select up to 10 funds</div>
+          <div class="company-search-wrap" style="margin-bottom:6px;">
+            <span class="search-icon">⌕</span>
+            <input class="company-search" id="fund-search" placeholder="Search fund name…" oninput="filterFundList()">
+          </div>
+          <div class="fund-cb-list" id="chart-fund-cb-list"></div>
+          <button class="btn-plot" id="btn-plot" onclick="plotChart()" disabled>Plot Chart</button>
+          <button class="btn-clear-chart" onclick="clearChart()">✕ Clear</button>
+        </div>
+        <div class="chart-main-panel">
+          <div class="chart-card">
+            <div class="chart-card-title" id="chart-title">FV / Par% by Fund — Quarterly</div>
+            <div class="chart-card-sub" id="chart-sub">Select a company and funds, then click Plot Chart</div>
+            <div id="chart-empty-state" class="chart-empty">Select a company and at least one fund to plot</div>
+            <div class="chart-wrap" id="chart-wrap" style="display:none;">
+              <canvas id="valuation-canvas"></canvas>
+            </div>
+          </div>
+          <div class="chart-tbl-wrap" id="chart-tbl-wrap" style="display:none;">
+            <div class="chart-tbl-header">
+              <span class="chart-tbl-title" id="chart-tbl-title">FV/Par% Detail Table</span>
+              <button class="btn-export" onclick="exportChartExcel()" style="padding:6px 14px;font-size:10px;">↓ Export</button>
+            </div>
+            <div class="tbl-scroll">
+              <table id="chart-detail-table">
+                <thead id="chart-detail-head"></thead>
+                <tbody id="chart-detail-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- TAB: OVERLAP MATRICES -->
+  <div class="tab-pane" id="tab-matrices">
+    <div class="picker-panel">
+      <div class="section-label">Overlap Matrices</div>
+      <div class="picker-toolbar">
+        <button class="chip-btn" onclick="mxPreset('mswm')">MSWM preset</button>
+        <button class="chip-btn" onclick="mxPreset('pubpriv')">Public + Private</button>
+        <button class="chip-btn" onclick="mxSelectAll(true)">Select all</button>
+        <button class="chip-btn" onclick="mxSelectAll(false)">Clear</button>
+        <input class="picker-search" id="mx-search" placeholder="Search funds…" oninput="filterGrid('mx-grid', this.value)">
+        <select class="primary-q-select" id="mx-qsel" style="min-width:130px;"></select>
+        <span class="picker-count" id="mx-count">0 selected</span>
+      </div>
+      <div class="fund-grid" id="mx-grid"></div>
+      <div style="margin-top:14px;display:flex;gap:10px;align-items:center;">
+        <button class="btn-run" id="mx-run" onclick="runOverlapMatrices()" disabled>Run Overlap Matrices</button>
+        <button class="btn-export" onclick="exportMatricesExcel()">Export</button>
+      </div>
+      <div class="log-msg" id="mx-log"></div>
+    </div>
+    <div id="mx-results"></div>
+  </div>
+
+  <!-- TAB: LEVEL 3 DEBT -->
+  <div class="tab-pane" id="tab-level3">
+    <div class="picker-panel">
+      <div class="section-label">Level 3 Debt Thresholds</div>
+      <div class="picker-toolbar">
+        <button class="chip-btn" onclick="l3Preset('mswm')">MSWM preset</button>
+        <button class="chip-btn" onclick="l3Preset('pubpriv')">Public + Private</button>
+        <button class="chip-btn" onclick="l3SelectAll(true)">Select all</button>
+        <button class="chip-btn" onclick="l3SelectAll(false)">Clear</button>
+        <input class="picker-search" id="l3-search" placeholder="Search funds…" oninput="filterGrid('l3-grid', this.value)">
+        <span class="picker-count" id="l3-count">0 selected</span>
+      </div>
+      <div class="fund-grid" id="l3-grid"></div>
+
+      <div class="picker-sub">Quarters to compare</div>
+      <div class="picker-toolbar" style="margin-bottom:8px;">
+        <button class="chip-btn" onclick="l3AllQuarters(true)">Select all quarters</button>
+        <button class="chip-btn" onclick="l3AllQuarters(false)">Clear quarters</button>
+        <span class="picker-count" id="l3-qcount">0 selected</span>
+      </div>
+      <div class="q-chip-row" id="l3-qrow"></div>
+
+      <div class="picker-sub">Cumulative FV % of Cost bands</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:9px;">
+        Enter thresholds from 1 to 100. Results are cumulative and shown as ≤ each selected band.
+      </div>
+      <div class="band-row" id="l3-bands"></div>
+      <div class="band-row" style="margin-top:10px;">
+        <button class="chip-btn" onclick="l3AddBand()">+ Add band</button>
+        <button class="chip-btn" onclick="l3ResetBands()">Reset to 70 / 80 / 90</button>
+        <span class="picker-count" id="l3-bandinfo" style="margin-left:0;"></span>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+        <button class="btn-run" id="l3-run" onclick="runLevel3Debt()" disabled>Run Level 3 Debt</button>
+        <button class="btn-export" onclick="exportLevel3Excel()">Export</button>
+      </div>
+      <div class="log-msg" id="l3-log"></div>
+    </div>
+    <div id="l3-results"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+if (window.Chart) { Chart.defaults.color = '#52657a'; Chart.defaults.borderColor = '#e3e9f1'; }
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const FUND_COLORS = ['#f0a500','#38bdf8','#a78bfa','#34d399','#fb7185'];
+const CHART_COLORS_EXTENDED = ['#f0a500','#38bdf8','#a78bfa','#34d399','#fb7185','#f472b6','#60a5fa','#fbbf24','#4ade80','#f87171'];
+const MAX_FUNDS = 5;
+const quarters = [null, null, null, null];
+let allFundNames = [];
+let analysisData = null;
+let trendData = null;
+let allRows = [];
+let sortCol = -1, sortDir = 1;
+let chartInstance = null;
+let selectedChartCompany = null;
+let allCompaniesForChart = []; // [{normKey, display}]
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtM(v) {
+  if (v == null || isNaN(v)) return '—';
+  return v.toFixed(2);
+}
+function shorten(s, n) {
+  return s && s.length > n ? s.substring(0, n) + '…' : s;
+}
+function setLog(id, msg, isError) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'log-msg' + (msg ? ' visible' : '') + (isError ? ' error' : '');
+}
+function toggleHowto(bodyId, arrowId) {
+  const body = document.getElementById(bodyId);
+  const arrow = document.getElementById(arrowId);
+  const isOpen = body.classList.toggle('open');
+  if (arrow) arrow.textContent = isOpen ? '▲' : '▼';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAB
+// ═══════════════════════════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DROP ZONE
+// ═══════════════════════════════════════════════════════════════
+function dzOver(e, i) { e.preventDefault(); document.getElementById('dz-'+i).classList.add('drag'); }
+function dzLeave(i) { document.getElementById('dz-'+i).classList.remove('drag'); }
+function dzDrop(e, i) { e.preventDefault(); dzLeave(i); const f = e.dataTransfer.files[0]; if(f) loadQ(i, f); }
+function dzChange(e, i) { const f = e.target.files[0]; if(f) loadQ(i, f); }
+
+function loadQ(idx, file) {
+  const dzc = document.getElementById('dzc-'+idx);
+  dzc.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin 0.7s linear infinite;"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--amber);">Reading ${esc(file.name)}…</div>
+    </div>`;
+  setLog('scan-log', `Reading ${file.name}…`);
+  const reader = new FileReader();
+  reader.onload = ev => {
+    setTimeout(() => {
+      try {
+        const wb = XLSX.read(ev.target.result, {
+          type: 'array', cellFormula: false, cellHTML: false,
+          cellNF: false, cellStyles: false, cellDates: false, sheetStubs: false,
+        });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header:1, defval:'', raw:true });
+        const parsed = parseSheet(rows, file.name.replace(/\.[^.]+$/, ''));
+        if (!parsed.length) throw new Error('No valid rows found');
+        const totalRows = parsed.reduce((s,f) => s + f.investments.length, 0);
+        quarters[idx] = { file, label: getQLabel(idx), parsed };
+        dzc.innerHTML = `
+          <div class="file-ok">
+            <span class="file-ok-icon">✓</span>
+            <span class="file-ok-name">${esc(file.name)}</span>
+          </div>
+          <div class="file-ok-meta">${parsed.length} BDC fund(s) · ${totalRows.toLocaleString()} positions</div>`;
+        document.getElementById('q'+idx+'-status').textContent = parsed.length + ' funds';
+        document.getElementById('q'+idx+'-status').style.color = 'var(--green)';
+        updateScanBtn();
+        setLog('scan-log', `Loaded: ${file.name} — ${parsed.length} fund(s), ${totalRows.toLocaleString()} rows`);
+      } catch(err) {
+        dzc.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--red);">⚠ ${esc(err.message)}</div>`;
+        document.getElementById('q'+idx+'-status').textContent = 'Error';
+        document.getElementById('q'+idx+'-status').style.color = 'var(--red)';
+        setLog('scan-log', '⚠ ' + err.message, true);
+      }
+    }, 30);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function getQLabel(idx) {
+  return (document.getElementById('ql-'+idx)?.value?.trim()) || ('Q' + (idx+1));
+}
+function updateScanBtn() {
+  const loaded = quarters.filter(q => q !== null).length;
+  document.getElementById('scan-btn').disabled = loaded < 1;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHEET PARSER
+// ═══════════════════════════════════════════════════════════════
+function parseSheet(rows, defaultName) {
+  if (rows.length < 2) throw new Error('File appears empty');
+  const hIdx = rows.findIndex(r =>
+    r.some(c => /bdc\s*name|normalize|company|issuer|name\s*of/i.test(String(c)))
+  );
+  if (hIdx === -1) throw new Error('Header row not found. Need: BDC Name, Normalize Name, Industry, Par Amount ($M), Cost ($M), Fair Value ($M).');
+  const hdrs = rows[hIdx].map(h => String(h).toLowerCase().trim());
+  const col = (...ps) => { for (const p of ps) { const i = hdrs.findIndex(h => h.replace(/\s+/g,' ').includes(p)); if (i >= 0) return i; } return -1; };
+ const C = {
+    fund: col('bdc name', 'fund name', 'fund'),
+    cik: col('cik'),
+    investeeId: col('investee id', 'investeeid', 'investee_id'),
+    company: col('normalize name', 'normalized name', 'company', 'issuer', 'name of'),
+    rawIndustry: col('raw industry', 'raw_industry'),
+    industry: col('industry', 'sector', 'gics'),
+    par: col('par amount', 'par value', 'par/share', 'par '),
+    cost: col('cost ($m)', 'cost($m)', 'cost'),
+    fv: col('fair value ($m)', 'fair value($m)', 'fair value', 'fair val'),
+    fvPctCost: col('fv % of cost', 'fv% of cost', 'fv pct of cost'),
+    pctTotalAssets: col('% of total assets', 'pct of total assets', '% total assets'),
+  };
+  if (C.company === -1) throw new Error('"Normalize Name" (or "Company") column not found.');
+  if (C.fv === -1) throw new Error('"Fair Value ($M)" column not found.');
+  const toN = v => {
+    if (v === '' || v == null || String(v).trim() === '—' || String(v).trim() === '-') return null;
+    const n = parseFloat(String(v).replace(/[$,\s()]/g,''));
+    return isNaN(n) ? null : n;
+  };
+  const fundMap = new Map();
+  for (let i = hIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    const co = String(r[C.company] || '').trim();
+    if (!co || /^(total|subtotal|portfolio|aggregate)/i.test(co)) continue;
+    const fv = toN(r[C.fv]);
+    if (fv === null) continue;
+    const bdcName = (C.fund >= 0 && String(r[C.fund]||'').trim()) || defaultName;
+    const cik = C.cik >= 0 ? String(r[C.cik]||'').trim() : '';
+    const mapKey = cik || bdcName;
+    if (!fundMap.has(mapKey)) fundMap.set(mapKey, { cik, _names: {}, investments: [] });
+    const bucket = fundMap.get(mapKey);
+    bucket._names[bdcName] = (bucket._names[bdcName] || 0) + 1;
+    bucket.investments.push({
+      investee_id: C.investeeId >= 0 ? String(r[C.investeeId]||'').trim() : '',
+      company: co,
+      industry: (() => {
+        const raw = C.rawIndustry >= 0 ? String(r[C.rawIndustry]||'').trim() : '';
+        if (raw && raw !== '—' && raw !== '-') return raw;
+        return C.industry >= 0 ? String(r[C.industry]||'Unknown').trim() : 'Unknown';
+      })(),
+      par_value: C.par >= 0 ? toN(r[C.par]) : null,
+      cost: C.cost >= 0 ? toN(r[C.cost]) : null,
+      fair_value: fv,
+      fv_pct_cost: C.fvPctCost >= 0 ? toN(r[C.fvPctCost]) : null,
+      pct_total_assets: C.pctTotalAssets >= 0 ? toN(r[C.pctTotalAssets]) : null,
+    });
+  }
+  if (!fundMap.size) throw new Error('No valid investment rows found after header row.');
+  // Derive canonical fund name per CIK — most frequent, then shortest, then alphabetically first
+  return [...fundMap.values()].map(bucket => {
+    const sorted = Object.entries(bucket._names).sort((x, y) => {
+      if (y[1] !== x[1]) return y[1] - x[1];
+      if (x[0].length !== y[0].length) return x[0].length - y[0].length;
+      return x[0].localeCompare(y[0]);
+    });
+ const fund_name = sorted.length ? sorted[0][0] : 'Unknown';
+    return { fund_name, cik: bucket.cik, investments: bucket.investments };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCAN
+// ═══════════════════════════════════════════════════════════════
+function scanAllFiles() {
+  quarters.forEach((q, i) => { if (q) q.label = getQLabel(i); });
+
+  // Step 1: collect name frequencies per CIK across ALL quarters
+  const cikNameFreq = new Map();
+  quarters.forEach(q => {
+    if (!q) return;
+    q.parsed.forEach(fd => {
+      const key = fd.cik || fd.fund_name;
+      if (!cikNameFreq.has(key)) cikNameFreq.set(key, {});
+      const freq = cikNameFreq.get(key);
+      freq[fd.fund_name] = (freq[fd.fund_name] || 0) + 1;
+    });
+  });
+
+  // Step 2: derive one canonical name per CIK — most frequent, then shortest, then alphabetically first
+  const cikCanonical = new Map();
+  cikNameFreq.forEach((freq, key) => {
+    const sorted = Object.entries(freq).sort((x, y) => {
+      if (y[1] !== x[1]) return y[1] - x[1];
+      if (x[0].length !== y[0].length) return x[0].length - y[0].length;
+      return x[0].localeCompare(y[0]);
+    });
+    cikCanonical.set(key, sorted[0][0]);
+  });
+
+  // Step 3: overwrite fund_name in every quarter with the global canonical name
+  quarters.forEach(q => {
+    if (!q) return;
+    q.parsed.forEach(fd => {
+      const key = fd.cik || fd.fund_name;
+      fd.fund_name = cikCanonical.get(key) || fd.fund_name;
+    });
+  });
+
+  const nameSet = new Set();
+  quarters.forEach(q => { if (q) q.parsed.forEach(fd => nameSet.add(fd.fund_name)); });
+  allFundNames = [...nameSet].sort((a,b) => a.localeCompare(b));
+  if (!allFundNames.length) { setLog('scan-log', '⚠ No BDC names detected.', true); return; }
+  setLog('scan-log', `Detected ${allFundNames.length} unique BDC fund(s) across ${quarters.filter(q=>q).length} quarter file(s).`);
+  updateStatusPill();
+  renderFundSelectors();
+  populatePrimaryQDropdown();
+  updateAnalyzeBtn();
+  document.getElementById('run-trend-btn').disabled = false;
+  initChartTab();
+  initMatricesTab();
+  initLevel3Tab();
+}
+
+function updateStatusPill() {
+  const pill = document.getElementById('status-pill');
+  const qCount = quarters.filter(q=>q).length;
+  pill.textContent = `${qCount} quarter file${qCount!==1?'s':''} · ${allFundNames.length} BDCs detected`;
+  pill.classList.add('ready');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FUND SELECTORS (5 dropdowns)
+// ═══════════════════════════════════════════════════════════════
+function renderFundSelectors() {
+  const grid = document.getElementById('selectors-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < MAX_FUNDS; i++) {
+    const color = FUND_COLORS[i];
+    const wrap = document.createElement('div');
+    wrap.className = 'fund-select-wrap';
+    wrap.innerHTML = `
+      <div class="fund-select-label" style="color:${color}">
+        <div class="fund-dot-sm" style="background:${color}"></div>
+        Fund ${i+1}
+      </div>
+      <select class="fund-select" id="fsel-${i}" onchange="onFundSelChange()">
+        <option value="">— None —</option>
+        ${allFundNames.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('')}
+      </select>`;
+    grid.appendChild(wrap);
+  }
+  document.getElementById('sel-count-msg').textContent =
+    `${allFundNames.length} BDC fund${allFundNames.length!==1?'s':''} available. Select 2–5 to compare.`;
+  onFundSelChange();
+}
+
+function getSelectedFunds() {
+  const out = [];
+  for (let i = 0; i < MAX_FUNDS; i++) {
+    const el = document.getElementById('fsel-'+i);
+    if (el && el.value) out.push(el.value);
+  }
+  return [...new Set(out)];
+}
+
+function onFundSelChange() {
+  const sel = getSelectedFunds();
+  document.getElementById('sel-count-msg').textContent =
+    `${sel.length} of 5 selected${sel.length < 2 ? ' — select at least 2 to analyze' : ''}.`;
+  for (let i = 0; i < MAX_FUNDS; i++) {
+    const el = document.getElementById('fsel-'+i);
+    if (el) el.classList.toggle('has-value', !!el.value);
+  }
+  updateAnalyzeBtn();
+}
+
+function populatePrimaryQDropdown() {
+  const sel = document.getElementById('primary-q-select');
+  sel.innerHTML = '';
+  quarters.forEach((q, i) => {
+    if (!q) return;
+    const lbl = q.label || ('Q' + (i+1));
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = lbl + ' (' + q.parsed.reduce((s,f)=>s+f.investments.length,0).toLocaleString() + ' positions)';
+    sel.appendChild(opt);
+  });
+}
+
+function updateAnalyzeBtn() {
+  const sel = getSelectedFunds();
+  const qSel = document.getElementById('primary-q-select')?.value;
+  document.getElementById('analyze-btn').disabled = sel.length < 2 || !allFundNames.length || qSel === '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAME NORMALIZER
+// ═══════════════════════════════════════════════════════════════
+function normName(name = '') {
+  return name.toLowerCase()
+    .replace(/[^a-z0-9]/g, ' ')
+.replace(/\s+/g, ' ')
+.trim();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AGGREGATE
+// ═══════════════════════════════════════════════════════════════
+function aggregate(investments) {
+  const m = new Map();
+  // Pass 1: accumulate values and track how often each name appears per ID
+  for (const inv of investments) {
+    const k = inv.investee_id || normName(inv.company);
+    if (!k) continue;
+    if (!m.has(k)) m.set(k, { investeeId: inv.investee_id || '', company: inv.company, industry: inv.industry, par:0, cost:0, fv:0, _names:{} });
+    const a = m.get(k);
+    a._names[inv.company] = (a._names[inv.company] || 0) + 1;
+    a.par += inv.par_value || 0;
+    a.cost += inv.cost || 0;
+    a.fv += inv.fair_value || 0;
+  }
+  // Pass 2: pick canonical name — most frequent, then shortest, then alphabetically first
+  for (const a of m.values()) {
+    const sorted = Object.entries(a._names).sort((x, y) => {
+      if (y[1] !== x[1]) return y[1] - x[1];           // most frequent first
+      if (x[0].length !== y[0].length) return x[0].length - y[0].length; // shortest first
+      return x[0].localeCompare(y[0]);                  // alphabetically first
+    });
+    a.company = sorted[0][0];
+    delete a._names;
+  }
+  return [...m.values()];
+}
+// ═══════════════════════════════════════════════════════════════
+// OVERLAP CORE
+// ═══════════════════════════════════════════════════════════════
+function computeOverlap(fundsData) {
+  const fundAgg = fundsData.map(fd => {
+    const companies = aggregate(fd.investments);
+    return { name: fd.fund_name, companies, total_fv: companies.reduce((s,c)=>s+c.fv,0), total_par: companies.reduce((s,c)=>s+c.par,0) };
+  });
+ const nameMap = new Map();
+  fundAgg.forEach(fund => {
+    fund.companies.forEach(inv => {
+      const k = inv.investeeId || normName(inv.company);
+      if (!nameMap.has(k)) nameMap.set(k, []);
+      nameMap.get(k).push({ fund: fund.name, ...inv });
+    });
+  });
+  const overlaps = [];
+  nameMap.forEach(entries => {
+    const present = [...new Set(entries.map(e=>e.fund))];
+    if (present.length < 2) return;
+    const byFund = {};
+    entries.forEach(e => { byFund[e.fund] = e; });
+    // Canonical name: most frequent, then shortest, then alphabetically first
+    const nameFreq = {};
+    entries.forEach(e => { nameFreq[e.company] = (nameFreq[e.company]||0) + 1; });
+    const canonicalName = Object.entries(nameFreq).sort((x,y) => {
+      if (y[1] !== x[1]) return y[1] - x[1];
+      if (x[0].length !== y[0].length) return x[0].length - y[0].length;
+      return x[0].localeCompare(y[0]);
+    })[0][0];
+    overlaps.push({
+      company: canonicalName,
+      normKey: entries[0].investeeId || normName(entries[0].company),
+      byFund,
+      total_fv: entries.reduce((s,e)=>s+e.fv, 0),
+      total_par: entries.reduce((s,e)=>s+e.par, 0),
+      total_cost: entries.reduce((s,e)=>s+e.cost, 0),
+    });
+  });
+  overlaps.sort((a,b) => b.total_fv - a.total_fv);
+  return { overlaps, fundAgg };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RUN OVERLAP ANALYSIS
+// ═══════════════════════════════════════════════════════════════
+function runOverlapAnalysis() {
+  setLog('analyze-log', 'Computing overlaps…');
+  try {
+    const selectedFunds = getSelectedFunds();
+    if (selectedFunds.length < 2) throw new Error('Select at least 2 funds.');
+    const primaryQIdx = parseInt(document.getElementById('primary-q-select').value);
+    const primaryQ = quarters[primaryQIdx];
+    if (!primaryQ) throw new Error('Primary quarter file not loaded.');
+    const fundsData = primaryQ.parsed.filter(fd => selectedFunds.includes(fd.fund_name));
+    const foundNames = fundsData.map(f => f.fund_name);
+    const missing = selectedFunds.filter(f => !foundNames.includes(f));
+    if (missing.length) setLog('analyze-log', `⚠ Not in primary quarter: ${missing.join(', ')}. Those funds will be skipped.`, true);
+    if (fundsData.length < 2) throw new Error('Fewer than 2 selected funds found in the primary quarter file.');
+    const { overlaps, fundAgg } = computeOverlap(fundsData);
+    const overlapNormKeys = new Set(overlaps.map(o => o.normKey));
+    analysisData = { overlaps, fundAgg, primaryQLabel: primaryQ.label, primaryQIdx, overlapNormKeys };
+    setLog('analyze-log', '');
+    renderOverlapResults(overlaps, fundAgg, primaryQ.label);
+  } catch(err) {
+    setLog('analyze-log', '⚠ ' + err.message, true);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER OVERLAP RESULTS
+// ═══════════════════════════════════════════════════════════════
+function renderOverlapResults(overlaps, fundAgg, qLabel) {
+  document.getElementById('results-section').style.display = 'block';
+  document.getElementById('results-section').scrollIntoView({ behavior:'smooth', block:'start' });
+  const fns = fundAgg.map(f => f.name);
+  const n = fns.length;
+  document.getElementById('results-title').textContent =
+    `Overlap Results — ${qLabel} · ${overlaps.length} companies · ${n} funds`;
+  const totalOvFV = overlaps.reduce((s,o)=>s+o.total_fv, 0);
+  const totalOvPar = overlaps.reduce((s,o)=>s+o.total_par, 0);
+  let stressed = 0, divergent = 0;
+  overlaps.forEach(o => {
+    const vals = fns.map(fn=>{const e=o.byFund[fn];return(e&&e.par>0)?e.fv/e.par*100:null;}).filter(v=>v!==null);
+    if (vals.some(v=>v<90)) stressed++;
+    if (vals.length>=2 && Math.max(...vals)-Math.min(...vals)>5) divergent++;
+  });
+  const cardsEl = document.getElementById('cards-grid');
+  cardsEl.innerHTML = '';
+  const cardDefs = [
+    { label:'Overlapping Companies', val: overlaps.length, color:'#f0a500', sub:`held by ≥2 funds · ${qLabel}` },
+    { label:'Total Overlap FV', val: fmtM(totalOvFV), color:'#34d399', sub:'combined fair value ($M)' },
+    { label:'Total Overlap Par', val: fmtM(totalOvPar), color:'#38bdf8', sub:'combined par value ($M)' },
+    { label:'Marking Divergences', val: divergent, color:'#a78bfa', sub:'>5pp FV/Par% spread' },
+    { label:'Stressed Positions', val: stressed, color:'#fb7185', sub:'FV/Par% <90% in any fund' },
+    ...fundAgg.map((f,i) => {
+      const oFV = overlaps.reduce((s,o)=>(o.byFund[f.name]?s+o.byFund[f.name].fv:s),0);
+      const pct = f.total_fv ? (oFV/f.total_fv*100).toFixed(1)+'%' : '—';
+      return { label: shorten(f.name,22), val: pct, color: FUND_COLORS[i%FUND_COLORS.length], sub:'overlap as % of FV' };
+    }),
+  ];
+  cardDefs.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'card fade-up'; el.style.borderTopColor = c.color;
+    el.innerHTML = `<div class="card-label">${c.label}</div><div class="card-value" style="color:${c.color}">${c.val}</div><div class="card-sub">${c.sub}</div>`;
+    cardsEl.appendChild(el);
+  });
+  // Table header
+  const thead = document.getElementById('table-head');
+  let r1='<tr>',r2='<tr>',r3='<tr>';
+ r1+=`<th rowspan="3" style="text-align:left;min-width:130px;font-family:'DM Mono',monospace;color:var(--amber)">Investee ID</th>`;
+  r1+=`<th rowspan="3" style="text-align:left;min-width:220px;cursor:pointer" onclick="sortByField('company')">Company</th>`;
+  r1+=`<th rowspan="3" style="text-align:center;cursor:pointer" onclick="sortByField('numFunds')"># Funds</th>`;
+  fns.forEach((fn, fi) => {
+    const c = FUND_COLORS[fi % FUND_COLORS.length];
+    r1+=`<th colspan="5" class="th-fund" style="color:${c};text-align:center;border-top:2px solid ${c}">${esc(shorten(fn,32))}</th>`;
+    r2+=`<th class="th-fund">Industry</th><th>Par ($M)</th><th>Cost ($M)</th><th>Fair Value ($M)</th><th>FV/Par%</th>`;
+    r3+=`<th class="th-fund" style="min-width:140px"></th><th></th><th></th><th style="font-weight:700"></th><th></th>`;
+  });
+  r1+=`<th colspan="2" style="text-align:center;border-left:2px solid #1e3050;color:var(--text2)">Combined</th>`;
+  r2+=`<th class="th-fund">Total Par</th><th>Total FV</th>`;
+  r3+=`<th></th><th></th>`;
+  r1+=`<th colspan="${n}" style="text-align:center;border-left:2px solid #1e3050;color:var(--text2)">% of Portfolio (FV)</th>`;
+  fns.forEach(fn => r2+=`<th class="th-fund">${esc(shorten(fn,12))}</th>`);
+  fns.forEach(() => r3+=`<th></th>`);
+  r1+='</tr>'; r2+='</tr>'; r3+='</tr>';
+  thead.innerHTML = r1+r2+r3;
+  allRows = overlaps.map(o => {
+    const inAll = Object.keys(o.byFund).length === n;
+let cells = `<td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--sky);white-space:nowrap">${esc(o.normKey)}</td>`;
+    cells += `<td class="company-cell">${esc(o.company)}${inAll?'<span class="all-badge">ALL</span>':''}</td>`;
+    cells += `<td class="num">${Object.keys(o.byFund).length}</td>`;
+    let hasStressed = false;
+    fns.forEach(fn => {
+      const e = o.byFund[fn];
+      const fvpar = (e && e.par > 0) ? (e.fv/e.par*100) : null;
+      const cls = fvpar===null?'':fvpar<90?'stressed':fvpar<100?'watch':'ok';
+      if (cls==='stressed') hasStressed=true;
+      cells += `<td class="industry-cell fund-border">${esc(e?e.industry:'—')}</td>`;
+      cells += `<td class="num">${e&&e.par ? fmtM(e.par) : '—'}</td>`;
+      cells += `<td class="num">${e&&e.cost ? fmtM(e.cost) : '—'}</td>`;
+      cells += `<td class="num" style="font-weight:600">${e ? fmtM(e.fv) : '—'}</td>`;
+      cells += `<td class="num fv-par ${cls}">${fvpar!==null?fvpar.toFixed(1)+'%':'—'}</td>`;
+    });
+    cells += `<td class="num fund-border" style="font-weight:600">${fmtM(o.total_par)}</td>`;
+    cells += `<td class="num" style="font-weight:600;color:var(--amber)">${fmtM(o.total_fv)}</td>`;
+    fns.forEach(fn => {
+      const fund=fundAgg.find(f=>f.name===fn), e=o.byFund[fn];
+      const p = (e&&fund&&fund.total_fv) ? (e.fv/fund.total_fv*100) : null;
+      cells += `<td class="num fund-border" style="color:var(--muted)">${p!==null?p.toFixed(4)+'%':'—'}</td>`;
+    });
+    return {
+      html: cells,
+      company: o.company.toLowerCase(),
+      industries: fns.map(fn=>o.byFund[fn]?.industry||'').join(' ').toLowerCase(),
+      inAll, hasStressed, data: o,
+    };
+  });
+  document.getElementById('table-count').textContent = `${allRows.length} overlapping companies`;
+  filterTable();
+  document.getElementById('footnote').textContent =
+    `Values in $M as reported in ${qLabel} SOI files. FV/Par% = Fair Value ÷ Par Value × 100. 🔴 <90% stressed · 🟡 90–100% watch · 🟢 >100% premium/PIK. Company matching uses normalized names (legal entity suffixes stripped). Divergence = >5pp spread in FV/Par% between funds. Generated ${new Date().toLocaleDateString()}.`;
+}
+
+function sortByField(field) {
+  if (sortCol === field) sortDir *= -1; else { sortCol = field; sortDir = 1; }
+  allRows.sort((a,b) => {
+    if (field==='company') return sortDir * a.company.localeCompare(b.company);
+    if (field==='numFunds') return sortDir * (Object.keys(b.data.byFund).length - Object.keys(a.data.byFund).length);
+    return 0;
+  });
+  filterTable();
+}
+
+function filterTable() {
+  const q = (document.getElementById('filter-input')?.value||'').toLowerCase();
+  const allOnly = document.getElementById('filter-all-only')?.checked;
+  const stressedOnly = document.getElementById('filter-stressed')?.checked;
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+  const filtered = allRows.filter(r => {
+    if (allOnly && !r.inAll) return false;
+    if (stressedOnly && !r.hasStressed) return false;
+    if (q && !r.company.includes(q) && !r.industries.includes(q)) return false;
+    return true;
+  });
+  document.getElementById('table-count').textContent = `${filtered.length} of ${allRows.length} overlapping companies`;
+  filtered.forEach(r => {
+    const tr = document.createElement('tr');
+    if (r.inAll) tr.className = 'all-funds';
+    tr.innerHTML = r.html;
+    tbody.appendChild(tr);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRICING TREND
+// ═══════════════════════════════════════════════════════════════
+function runTrendAnalysis() {
+  setLog('trend-log', 'Computing trends…');
+  try {
+    const selectedFunds = getSelectedFunds();
+    if (selectedFunds.length < 2) throw new Error('Select at least 2 funds in the fund selectors above (Overlap tab).');
+    const loadedQs = quarters.map((q,i) => q ? {...q, idx:i} : null).filter(Boolean);
+    if (loadedQs.length < 1) throw new Error('No quarterly files loaded.');
+    if (!analysisData) throw new Error('Run Overlap Analysis first — the trend uses the same overlap universe.');
+    const { overlapNormKeys, primaryQLabel, primaryQIdx } = analysisData;
+    const qLabels = loadedQs.map(q => q.label || ('Q'+(q.idx+1)));
+    const companyMap = new Map();
+    analysisData.overlaps.forEach(o => {
+      const byFund = {};
+      selectedFunds.forEach(fn => { byFund[fn] = new Array(loadedQs.length).fill(null); });
+      companyMap.set(o.normKey, {
+        display: o.company,
+        industry: (() => {
+          for (const fn of selectedFunds) { if (o.byFund[fn]?.industry) return o.byFund[fn].industry; }
+          return 'Unknown';
+        })(),
+        byFund,
+      });
+    });
+    loadedQs.forEach((q, qi) => {
+      selectedFunds.forEach(fn => {
+        const fd = q.parsed.find(f => f.fund_name === fn);
+        if (!fd) return;
+       fd.investments.forEach(inv => {
+          const k = inv.investee_id || normName(inv.company);
+          if (!k || !companyMap.has(k)) return;
+          const entry = companyMap.get(k);
+          const cur = entry.byFund[fn][qi] || { fv:0, par:0 };
+          cur.fv += inv.fair_value || 0;
+          cur.par += inv.par_value || 0;
+          entry.byFund[fn][qi] = cur;
+        });
+      });
+    });
+    const trendRows = [];
+    companyMap.forEach(entry => {
+      selectedFunds.forEach(fn => {
+        entry.byFund[fn] = entry.byFund[fn].map(q => {
+          if (!q) return null;
+          return { fv: q.fv, par: q.par, fvpar: q.par > 0 ? q.fv/q.par*100 : null };
+        });
+      });
+      trendRows.push(entry);
+    });
+    if (!trendRows.length) { setLog('trend-log', '⚠ No overlapping companies found. Run Overlap Analysis first.', true); return; }
+    trendData = { trendRows, selectedFunds, qLabels, loadedQs, primaryQLabel };
+    setLog('trend-log', '');
+    renderTrendResults(trendData);
+  } catch(err) {
+    setLog('trend-log', '⚠ ' + err.message, true);
+  }
+}
+
+function renderTrendResults({ trendRows, selectedFunds, qLabels, primaryQLabel }) {
+  const wrap = document.getElementById('trend-results-wrap');
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('trend-results-title').textContent =
+    `Pricing Trend · ${trendRows.length} Companies (overlap from ${primaryQLabel}) · ${selectedFunds.length} Funds · ${qLabels.length} Quarters`;
+  let deteriorating=0, improving=0, stressed=0, divergent=0;
+  trendRows.forEach(({ byFund }) => {
+    selectedFunds.forEach(fn => {
+      const qs = (byFund[fn]||[]).filter(q=>q&&q.fvpar!==null);
+      if (qs.some(q=>q.fvpar<90)) stressed++;
+      if (qs.length>=2) {
+        const d = qs[qs.length-1].fvpar - qs[0].fvpar;
+        if (d < -2) deteriorating++; else if (d > 2) improving++;
+      }
+    });
+    const lastVals = selectedFunds.map(fn=>{const qs=byFund[fn]||[];const last=[...qs].reverse().find(q=>q&&q.fvpar!==null);return last?last.fvpar:null;}).filter(v=>v!==null);
+    if (lastVals.length>=2 && Math.max(...lastVals)-Math.min(...lastVals)>5) divergent++;
+  });
+  const cEl = document.getElementById('trend-cards-grid');
+  cEl.innerHTML = '';
+  [
+    { label:'Overlapping Names', val: trendRows.length, color:'#f0a500', sub:'across selected funds' },
+    { label:'Deteriorating Marks', val: deteriorating, color:'#fb7185', sub:'FV/Par% down >2pp Q1→latest' },
+    { label:'Improving Marks', val: improving, color:'#34d399', sub:'FV/Par% up >2pp Q1→latest' },
+    { label:'Marking Divergences', val: divergent, color:'#a78bfa', sub:'>5pp spread in latest quarter' },
+    { label:'Stressed (any Qtr)', val: stressed, color:'#ef4444', sub:'FV/Par% <90%' },
+  ].forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'card fade-up'; el.style.borderTopColor = c.color;
+    el.innerHTML = `<div class="card-label">${c.label}</div><div class="card-value" style="color:${c.color}">${c.val}</div><div class="card-sub">${c.sub}</div>`;
+    cEl.appendChild(el);
+  });
+  const container = document.getElementById('trend-tables-container');
+  container.innerHTML = '';
+  selectedFunds.forEach((fn, fi) => {
+    const color = FUND_COLORS[fi % FUND_COLORS.length];
+    const fundRows = trendRows.filter(r => (r.byFund[fn]||[]).some(q=>q!==null));
+    fundRows.sort((a,b) => {
+      const aLast = [...(a.byFund[fn]||[])].reverse().find(q=>q&&q.fvpar!==null);
+      const bLast = [...(b.byFund[fn]||[])].reverse().find(q=>q&&q.fvpar!==null);
+      return (aLast?aLast.fvpar:999) - (bLast?bLast.fvpar:999);
+    });
+    const qAvgs = qLabels.map((_,qi) => {
+      const vals = fundRows.map(r=>(r.byFund[fn]||[])[qi]).filter(q=>q&&q.fvpar!==null).map(q=>q.fvpar);
+      return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : null;
+    });
+    const hasMultiQ = qLabels.length >= 2;
+    let html = `
+      <div class="trend-fund-block fade-up">
+        <div class="trend-fund-header">
+          <div class="trend-fund-dot" style="background:${color}"></div>
+          <div class="trend-fund-name">${esc(fn)}</div>
+          <div class="trend-count-badge">${fundRows.length} overlapping positions</div>
+          <div class="trend-avg-row">Portfolio avg: ${qLabels.map((l,qi)=>qAvgs[qi]!==null?`${l}: ${qAvgs[qi].toFixed(1)}%`:'').filter(Boolean).join(' → ')}</div>
+        </div>
+        <div class="table-wrap">
+          <div class="tbl-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th style="text-align:left;min-width:210px;border-top:2px solid ${color}">Company</th>
+                  <th style="text-align:left;border-top:2px solid ${color}">Industry</th>
+                  ${qLabels.map(l=>`
+                    <th style="text-align:right;border-top:2px solid ${color}">${esc(l)}<br><span style="color:var(--muted);font-size:8px">FV/Par%</span></th>
+                    <th style="text-align:right;border-top:2px solid ${color}">${esc(l)}<br><span style="color:var(--muted);font-size:8px">FV ($M)</span></th>`).join('')}
+                  ${hasMultiQ ? `
+                    <th style="text-align:right;border-top:2px solid ${color}">Δ Q1→Latest<br><span style="color:var(--muted);font-size:8px">(pp)</span></th>
+                    <th style="text-align:center;border-top:2px solid ${color}">Trend</th>` : ''}
+                </tr>
+              </thead>
+              <tbody>`;
+    fundRows.forEach(({ display, industry, byFund }) => {
+      const qs = byFund[fn] || [];
+      const qCells = qLabels.map((_, qi) => {
+        const q = qs[qi];
+        if (!q || q.fvpar === null) return `<td class="num trend-cell-na">—</td><td class="num trend-cell-na">—</td>`;
+        const cls = q.fvpar<90?'trend-cell-stressed':q.fvpar<100?'trend-cell-watch':'trend-cell-ok';
+        return `<td class="num ${cls}">${q.fvpar.toFixed(1)}%</td><td class="num">${fmtM(q.fv)}</td>`;
+      });
+      let deltaCell='', trendCell='';
+      if (hasMultiQ) {
+        const firstQ=[...qs].find(q=>q&&q.fvpar!==null);
+        const lastQ=[...qs].reverse().find(q=>q&&q.fvpar!==null);
+        if (firstQ && lastQ && firstQ!==lastQ) {
+          const d=lastQ.fvpar-firstQ.fvpar;
+          const dc=d<-1?'delta-down':d>1?'delta-up':'delta-flat';
+          const ar=d<-1?'↓':d>1?'↑':'→';
+          deltaCell=`<td class="num ${dc}">${d>0?'+':''}${d.toFixed(1)}</td>`;
+          trendCell=`<td style="text-align:center;font-size:14px" class="${dc}">${ar}</td>`;
+        } else {
+          deltaCell=`<td class="num trend-cell-na">—</td>`;
+          trendCell=`<td style="text-align:center;color:var(--muted)">→</td>`;
+        }
+      }
+      html += `<tr>
+        <td class="company-cell">${esc(display)}</td>
+        <td class="industry-cell">${esc(industry)}</td>
+        ${qCells.join('')}${deltaCell}${trendCell}
+      </tr>`;
+    });
+    html += `<tr class="avg-row">
+      <td class="company-cell" style="color:var(--muted)">Avg FV/Par% — ${esc(fn)}</td>
+      <td></td>
+      ${qLabels.map((_,qi)=>{
+        const v=qAvgs[qi];
+        if(v===null) return `<td class="num trend-cell-na">—</td><td></td>`;
+        const cls=v<90?'trend-cell-stressed':v<100?'trend-cell-watch':'trend-cell-ok';
+        return `<td class="num ${cls}">${v.toFixed(1)}%</td><td></td>`;
+      }).join('')}
+      ${hasMultiQ ? '<td></td><td></td>' : ''}
+    </tr>`;
+    html += `</tbody></table></div></div></div>`;
+    container.insertAdjacentHTML('beforeend', html);
+  });
+  document.getElementById('trend-footnote').textContent =
+    `FV/Par% = Fair Value ÷ Par Value × 100. 🟢 >100% · 🟡 90–100% · 🔴 <90% stressed. Δ = change from first to latest quarter in percentage points (pp). Overlap universe = companies overlapping in ${primaryQLabel}. Sorted most stressed first. Generated ${new Date().toLocaleDateString()}.`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT — OVERLAP
+// ═══════════════════════════════════════════════════════════════
+function exportOverlapExcel() {
+  if (!analysisData) return;
+  const { overlaps, fundAgg, primaryQLabel } = analysisData;
+  const fns = fundAgg.map(f=>f.name);
+  const wb = XLSX.utils.book_new();
+  const h = ['Company','# Funds',
+    ...fns.flatMap(fn=>[`${fn} Industry`,`${fn} Par ($M)`,`${fn} Cost ($M)`,`${fn} Fair Value ($M)`,`${fn} FV/Par %`]),
+    'Total Par ($M)','Total FV ($M)',
+    ...fns.map(fn=>`${fn} % of Portfolio (FV)`)
+  ];
+  const rows = overlaps.map(o => {
+    const r=[o.company, Object.keys(o.byFund).length];
+    fns.forEach(fn=>{const e=o.byFund[fn];const fvp=(e&&e.par>0)?+(e.fv/e.par*100).toFixed(2):null;r.push(e?e.industry:null,e?e.par:null,e?e.cost:null,e?e.fv:null,fvp);});
+    r.push(o.total_par,o.total_fv);
+    fns.forEach(fn=>{const fund=fundAgg.find(f=>f.name===fn);const e=o.byFund[fn];r.push(e&&fund?.total_fv?+(e.fv/fund.total_fv*100).toFixed(4):null);});
+    return r;
+  });
+  const ws1=XLSX.utils.aoa_to_sheet([h,...rows]);
+  ws1['!cols']=h.map((_,i)=>({wch:i===0?44:i===1?8:18}));
+  XLSX.utils.book_append_sheet(wb,ws1,`Overlap ${primaryQLabel}`.substring(0,31));
+  // Sheet 2 — fund summary
+  const s2=[
+    [`BDC Overlap Summary — ${primaryQLabel}`],['Generated:',new Date().toLocaleDateString()],[],
+    ['BDC Fund','Total FV ($M)','Total Par ($M)','Overlap FV ($M)','Overlap Par ($M)','FV/Par % (Overlap)','% Portfolio in Overlap','# Overlapping Cos'],
+    ...fundAgg.map(f=>{
+      const oFV=overlaps.reduce((s,o)=>(o.byFund[f.name]?s+o.byFund[f.name].fv:s),0);
+      const oPar=overlaps.reduce((s,o)=>(o.byFund[f.name]?s+o.byFund[f.name].par:s),0);
+      const oN=overlaps.filter(o=>o.byFund[f.name]).length;
+      return [f.name,f.total_fv,f.total_par,oFV,oPar,oPar?+(oFV/oPar*100).toFixed(2):null,f.total_fv?+(oFV/f.total_fv*100).toFixed(2):null,oN];
+    })
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(s2); ws2['!cols']=[{wch:44},...Array(7).fill({wch:18})];
+  XLSX.utils.book_append_sheet(wb,ws2,'Fund Summary');
+  // Sheet 3 — by industry
+  const iMap=new Map();
+  overlaps.forEach(o=>{fns.forEach(fn=>{const e=o.byFund[fn];if(!e)return;const k=e.industry||'—';if(!iMap.has(k))iMap.set(k,{ind:k,n:0,fv:0,par:0});const d=iMap.get(k);d.n++;d.fv+=e.fv;d.par+=e.par;});});
+  const s3h=['Industry','# Positions','Total FV ($M)','Total Par ($M)','FV/Par %'];
+  const s3r=[...iMap.values()].sort((a,b)=>b.fv-a.fv).map(d=>[d.ind,d.n,d.fv,d.par,d.par?+(d.fv/d.par*100).toFixed(2):null]);
+  const ws3=XLSX.utils.aoa_to_sheet([s3h,...s3r]); ws3['!cols']=[{wch:34},{wch:12},{wch:16},{wch:16},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws3,'By Industry');
+  XLSX.writeFile(wb,`BDC_Overlap_${primaryQLabel.replace(/\s/g,'_')}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT — TREND
+// ═══════════════════════════════════════════════════════════════
+function exportTrendExcel() {
+  if (!trendData) return;
+  const { trendRows, selectedFunds, qLabels, primaryQLabel } = trendData;
+  const wb = XLSX.utils.book_new();
+  selectedFunds.forEach(fn => {
+    const h=['Company','Industry',
+      ...qLabels.flatMap(l=>[`${l} FV/Par%`,`${l} FV ($M)`,`${l} Par ($M)`]),
+      'Δ Q1→Latest (pp)'
+    ];
+    const rows=[];
+    trendRows.forEach(({ display, industry, byFund }) => {
+      const qs=byFund[fn]||[];
+      if (!qs.some(q=>q)) return;
+      const r=[display,industry];
+      qs.forEach(q=>{r.push(q&&q.fvpar!==null?+(q.fvpar.toFixed(2)):null,q?+(q.fv.toFixed(3)):null,q?+(q.par.toFixed(3)):null);});
+      const first=[...qs].find(q=>q&&q.fvpar!==null);
+      const last=[...qs].reverse().find(q=>q&&q.fvpar!==null);
+      r.push(first&&last&&first!==last?+(last.fvpar-first.fvpar).toFixed(2):null);
+      rows.push(r);
+    });
+    rows.sort((a,b)=>(a[2]??999)-(b[2]??999));
+    const ws=XLSX.utils.aoa_to_sheet([h,...rows]);
+    ws['!cols']=[{wch:44},{wch:24},...h.slice(2).map(()=>({wch:14}))];
+    XLSX.utils.book_append_sheet(wb, ws, fn.substring(0,28).replace(/[\\\/\?\*\[\]]/g,'_'));
+  });
+  // Divergence summary sheet
+  const dH=['Company','Industry',...qLabels.flatMap(l=>[`${l} Min FV/Par%`,`${l} Max FV/Par%`,`${l} Spread (pp)`]),'Max Spread (pp)'];
+  const dR=[];
+  trendRows.forEach(({ display, industry, byFund }) => {
+    const r=[display,industry];
+    let maxSpread=0;
+    qLabels.forEach((_,qi)=>{
+      const vals=selectedFunds.map(fn=>(byFund[fn]||[])[qi]).filter(q=>q&&q.fvpar!==null).map(q=>q.fvpar);
+      if(vals.length>=2){const mn=Math.min(...vals),mx=Math.max(...vals),sp=mx-mn;r.push(+mn.toFixed(2),+mx.toFixed(2),+sp.toFixed(2));if(sp>maxSpread)maxSpread=sp;}
+      else r.push(null,null,null);
+    });
+    r.push(+maxSpread.toFixed(2));
+    dR.push(r);
+  });
+  dR.sort((a,b)=>b[b.length-1]-a[a.length-1]);
+  const wsD=XLSX.utils.aoa_to_sheet([dH,...dR]);
+  wsD['!cols']=[{wch:44},{wch:24},...dH.slice(2).map(()=>({wch:14}))];
+  XLSX.utils.book_append_sheet(wb,wsD,'Divergence Summary');
+  XLSX.writeFile(wb,`BDC_Trend_${(primaryQLabel||'export').replace(/\s/g,'_')}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHART TAB
+// ═══════════════════════════════════════════════════════════════
+function initChartTab() {
+  document.getElementById('chart-not-ready').style.display = 'none';
+  document.getElementById('chart-ready-content').style.display = 'block';
+  // Build unique company list from all quarters
+  const compMap = new Map(); // normKey → display
+  quarters.forEach(q => {
+    if (!q) return;
+    q.parsed.forEach(fd => {
+    fd.investments.forEach(inv => {
+        const k = inv.investee_id || normName(inv.company);
+        if (k && !compMap.has(k)) compMap.set(k, inv.company);
+      });
+    });
+  });
+  allCompaniesForChart = [...compMap.entries()]
+    .map(([normKey, display]) => ({ normKey, display }))
+    .sort((a,b) => a.display.localeCompare(b.display));
+  // Populate listbox
+  const lb = document.getElementById('co-listbox');
+  lb.innerHTML = '';
+  allCompaniesForChart.forEach(({ normKey, display }) => {
+    const div = document.createElement('div');
+    div.className = 'company-option';
+    div.dataset.norm = normKey;
+    div.textContent = display;
+    div.onclick = () => selectChartCompany(normKey, display, div);
+    lb.appendChild(div);
+  });
+  // Populate fund checkboxes
+  renderChartFundCheckboxes();
+  updatePlotBtn();
+}
+
+function renderChartFundCheckboxes() {
+  const list = document.getElementById('chart-fund-cb-list');
+  list.innerHTML = '';
+  allFundNames.forEach((fn, i) => {
+    const color = CHART_COLORS_EXTENDED[i % CHART_COLORS_EXTENDED.length];
+    const row = document.createElement('div');
+    row.className = 'fund-cb-row';
+    row.style.setProperty('--fcol', color);
+    row.dataset.fund = fn;
+    row.innerHTML = `
+      <input type="checkbox" id="fcb-${i}">
+      <div class="fund-cb-box">✓</div>
+      <span class="fund-cb-lbl" title="${esc(fn)}">${esc(fn)}</span>`;
+    row.onclick = () => toggleChartFund(row, fn);
+    list.appendChild(row);
+  });
+}
+
+function toggleChartFund(row, fn) {
+  const checked = [...document.querySelectorAll('#chart-fund-cb-list .fund-cb-row.checked')];
+  const isChecked = row.classList.contains('checked');
+  if (!isChecked && checked.length >= 10) {
+    document.getElementById('chart-fund-info').textContent = 'Max 10 funds selected';
+    return;
+  }
+  row.classList.toggle('checked');
+  updateChartFundCount();
+  updatePlotBtn();
+}
+
+function updateChartFundCount() {
+  const n = document.querySelectorAll('#chart-fund-cb-list .fund-cb-row.checked').length;
+  document.getElementById('chart-fund-count').textContent = `(${n} / 10 selected)`;
+  document.getElementById('chart-fund-info').textContent = n > 0 ? `${n} fund${n!==1?'s':''} selected` : 'Select up to 10 funds';
+}
+
+function selectChartCompany(normKey, display, el) {
+  document.querySelectorAll('#co-listbox .company-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedChartCompany = { normKey, display };
+  updatePlotBtn();
+}
+
+function filterCompanyList() {
+  const q = document.getElementById('co-search').value.toLowerCase();
+  document.querySelectorAll('#co-listbox .company-option').forEach(o => {
+    o.classList.toggle('hidden', q && !o.textContent.toLowerCase().includes(q));
+  });
+}
+
+function filterFundList() {
+  const q = document.getElementById('fund-search').value.toLowerCase();
+  document.querySelectorAll('#chart-fund-cb-list .fund-cb-row').forEach(r => {
+    r.style.display = q && !r.dataset.fund.toLowerCase().includes(q) ? 'none' : '';
+  });
+}
+
+function updatePlotBtn() {
+  const hasCompany = !!selectedChartCompany;
+  const hasFunds = document.querySelectorAll('#chart-fund-cb-list .fund-cb-row.checked').length > 0;
+  document.getElementById('btn-plot').disabled = !hasCompany || !hasFunds;
+}
+
+function plotChart() {
+  if (!selectedChartCompany) return;
+  const { normKey, display } = selectedChartCompany;
+  const selectedFunds = [...document.querySelectorAll('#chart-fund-cb-list .fund-cb-row.checked')].map(r => r.dataset.fund);
+  const loadedQs = quarters.map((q,i) => q ? {...q, idx:i} : null).filter(Boolean);
+  const qLabels = loadedQs.map(q => q.label || ('Q'+(q.idx+1)));
+  // Build datasets
+  const datasets = [];
+  const tableData = []; // {fund, vals:[{fvpar,fv,par}]}
+  selectedFunds.forEach((fn, fi) => {
+    const color = CHART_COLORS_EXTENDED[fi % CHART_COLORS_EXTENDED.length];
+    const vals = loadedQs.map(q => {
+      const fd = q.parsed.find(f => f.fund_name === fn);
+      if (!fd) return null;
+      let fv=0, par=0;
+     fd.investments.forEach(inv => {
+        if ((inv.investee_id || normName(inv.company)) === normKey) {
+          fv += inv.fair_value || 0;
+          par += inv.par_value || 0;
+        }
+      });
+      if (fv === 0 && par === 0) return null;
+      return { fvpar: par > 0 ? fv/par*100 : null, fv, par };
+    });
+    if (!vals.some(v => v !== null)) return; // fund doesn't hold this company in any quarter
+    datasets.push({
+      label: fn,
+      data: vals.map(v => v && v.fvpar !== null ? +v.fvpar.toFixed(2) : null),
+      borderColor: color,
+      backgroundColor: color + '22',
+      pointBackgroundColor: color,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      borderWidth: 2,
+      tension: 0.3,
+      spanGaps: true,
+    });
+    tableData.push({ fn, color, vals });
+  });
+  if (!datasets.length) {
+    alert('None of the selected funds hold this company in any uploaded quarter.');
+    return;
+  }
+  // Render chart
+  document.getElementById('chart-empty-state').style.display = 'none';
+  const chartWrap = document.getElementById('chart-wrap');
+  chartWrap.style.display = 'block';
+  const canvas = document.getElementById('valuation-canvas');
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  chartInstance = new Chart(canvas, {
+    type: 'line',
+    data: { labels: qLabels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#cdd9e8', font: { family: 'DM Mono', size: 10 }, boxWidth: 12 } },
+        tooltip: {
+          backgroundColor: '#0c1a2e', borderColor: '#1e3050', borderWidth: 1,
+          titleColor: '#f0a500', bodyColor: '#cdd9e8',
+          callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(1)+'%' : 'N/A'}` }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#8fa3b8', font: { family: 'DM Mono', size: 10 } }, grid: { color: '#1e3050' } },
+        y: {
+          ticks: { color: '#8fa3b8', font: { family: 'DM Mono', size: 10 }, callback: v => v.toFixed(1)+'%' },
+          grid: { color: '#1e3050' },
+          title: { display: true, text: 'FV / Par %', color: '#4a6580', font: { family: 'DM Mono', size: 10 } }
+        }
+      }
+    }
+  });
+  document.getElementById('chart-title').textContent = `FV / Par% — ${display}`;
+  document.getElementById('chart-sub').textContent = `${datasets.length} fund${datasets.length!==1?'s':''} · ${qLabels.length} quarter${qLabels.length!==1?'s':''}`;
+  // Table
+  const thead = document.getElementById('chart-detail-head');
+  const tbody = document.getElementById('chart-detail-body');
+  thead.innerHTML = `<tr>
+    <th style="text-align:left">Fund</th>
+    ${qLabels.map(l=>`<th style="text-align:right">${esc(l)}<br><span style="color:var(--muted);font-size:8px">FV/Par%</span></th><th style="text-align:right">${esc(l)}<br><span style="color:var(--muted);font-size:8px">FV ($M)</span></th>`).join('')}
+    ${qLabels.length>=2?'<th style="text-align:right">Δ (pp)</th>':''}
+  </tr>`;
+  tbody.innerHTML = '';
+  tableData.forEach(({ fn, color, vals }) => {
+    const cells = vals.map(v => {
+      if (!v) return `<td class="num trend-cell-na">—</td><td class="num trend-cell-na">—</td>`;
+      const cls = v.fvpar===null?'':v.fvpar<90?'trend-cell-stressed':v.fvpar<100?'trend-cell-watch':'trend-cell-ok';
+      return `<td class="num ${cls}">${v.fvpar!==null?v.fvpar.toFixed(1)+'%':'—'}</td><td class="num">${fmtM(v.fv)}</td>`;
+    });
+    let dCell='';
+    if (qLabels.length >= 2) {
+      const first=vals.find(v=>v&&v.fvpar!==null), last=[...vals].reverse().find(v=>v&&v.fvpar!==null);
+      if (first&&last&&first!==last){const d=last.fvpar-first.fvpar;const dc=d<-1?'delta-down':d>1?'delta-up':'delta-flat';dCell=`<td class="num ${dc}">${d>0?'+':''}${d.toFixed(1)}</td>`;}
+      else dCell=`<td class="num trend-cell-na">—</td>`;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color:${color};font-weight:600">${esc(fn)}</td>${cells.join('')}${dCell}`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('chart-tbl-wrap').style.display = 'block';
+  document.getElementById('chart-tbl-title').textContent = `FV/Par% Detail — ${display}`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED HELPERS FOR MATRICES + LEVEL 3
+// ═══════════════════════════════════════════════════════════════
+let mxSelected = new Set();
+let l3Selected = new Set();
+let l3Quarters = new Set();
+let l3Bands = [70, 80, 90];
+let mxLastResult = null;
+let l3LastResult = null;
+
+function shortFundLabel(name) {
+  const map = {
+    'Apollo Debt Solutions BDC':'ADS','Blackstone Private Credit Fund':'BCRED',
+    'HPS Corporate Lending Fund':'HLEND','Blue Owl Credit Income Corp.':'OCIC',
+    'Blue Owl Credit Income Corp':'OCIC','Oaktree Strategic Credit Fund':'OSCF',
+    'Ares Strategic Income Fund':'ASIF','Golub Capital Private Credit Fund':'GCRED',
+    'T. Rowe Price OHA Select Private Credit Fund':'OCREDIT',
+    'Nuveen Churchill Private Capital Income Fund':'PCAP',
+    'KKR FS Income Trust':'KFIT'
+  };
+  if (map[name]) return map[name];
+  const w = String(name).replace(/[^A-Za-z0-9 ]/g,' ').split(/\s+/).filter(Boolean);
+  if (w.length <= 2) return name.length > 16 ? name.slice(0,16)+'…' : name;
+  return w.slice(0,3).map(x => x[0].toUpperCase()).join('');
+}
+
+function buildFundGrid(gridId, selectedSet, countId, onChange) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = allFundNames.map((n,i) =>
+    `<div class="fg-item${selectedSet.has(n)?' on':''}" data-fund="${esc(n)}" onclick="toggleGridItem('${gridId}',this)">
+       <div class="fg-box">${selectedSet.has(n)?'✓':''}</div>
+       <div class="fg-lbl" title="${esc(n)}">${esc(n)}</div>
+     </div>`).join('');
+  grid._set = selectedSet; grid._count = countId; grid._onChange = onChange;
+  updateGridCount(gridId);
+}
+
+function toggleGridItem(gridId, el) {
+  const grid = document.getElementById(gridId);
+  const fund = el.dataset.fund;
+  const set = grid._set;
+  if (set.has(fund)) { set.delete(fund); el.classList.remove('on'); el.querySelector('.fg-box').textContent=''; }
+  else { set.add(fund); el.classList.add('on'); el.querySelector('.fg-box').textContent='✓'; }
+  updateGridCount(gridId);
+  if (grid._onChange) grid._onChange();
+}
+
+function updateGridCount(gridId) {
+  const grid = document.getElementById(gridId);
+  const el = document.getElementById(grid._count);
+  if (el) el.textContent = `${grid._set.size} selected`;
+}
+
+function filterGrid(gridId, term) {
+  const t = String(term||'').toLowerCase();
+  document.querySelectorAll('#'+gridId+' .fg-item').forEach(el => {
+    el.classList.toggle('hidden', !!t && !el.dataset.fund.toLowerCase().includes(t));
+  });
+}
+
+function setGridSelection(gridId, names) {
+  const grid = document.getElementById(gridId);
+  grid._set.clear();
+  names.forEach(n => grid._set.add(n));
+  document.querySelectorAll('#'+gridId+' .fg-item').forEach(el => {
+    const on = grid._set.has(el.dataset.fund);
+    el.classList.toggle('on', on);
+    el.querySelector('.fg-box').textContent = on ? '✓' : '';
+  });
+  updateGridCount(gridId);
+  if (grid._onChange) grid._onChange();
+}
+
+const MSWM_PRESET = ['Apollo Debt Solutions BDC','Blackstone Private Credit Fund','HPS Corporate Lending Fund',
+  'Blue Owl Credit Income Corp.','Oaktree Strategic Credit Fund'];
+
+function presetNames(kind) {
+  if (kind === 'mswm') return allFundNames.filter(n => MSWM_PRESET.some(p => normName(p) === normName(n)));
+  return allFundNames.slice();   // 'pubpriv' = everything detected
+}
+
+// Pull every fund-quarter record for a given quarter index
+function fundsInQuarter(qIdx) {
+  const q = quarters[qIdx];
+  if (!q) return new Map();
+  const m = new Map();
+  q.parsed.forEach(fd => m.set(fd.fund_name, fd));
+  return m;
+}
+
+function loadedQuarterIdxs() {
+  const out = [];
+  quarters.forEach((q,i) => { if (q) out.push(i); });
+  return out;
+}
+
+// heat colour: low = green, mid = yellow, high = red (relative within matrix)
+function heatColor(v, min, max) {
+  if (v == null || isNaN(v)) return 'transparent';
+  if (max <= min) return 'rgba(134,199,134,0.35)';
+  const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
+  let r, g, b;
+  if (t < 0.5) { const u = t/0.5; r = Math.round(140 + u*(250-140)); g = Math.round(200 + u*(226-200)); b = Math.round(140 + u*(120-140)); }
+  else { const u = (t-0.5)/0.5; r = Math.round(250 + u*(232-250)); g = Math.round(226 + u*(120-226)); b = Math.round(120 + u*(110-120)); }
+  return `rgba(${r},${g},${b},0.75)`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OVERLAP MATRICES
+// ═══════════════════════════════════════════════════════════════
+function initMatricesTab() {
+  if (!mxSelected.size) presetNames('mswm').forEach(n => mxSelected.add(n));
+  buildFundGrid('mx-grid', mxSelected, 'mx-count', updateMxBtn);
+  const sel = document.getElementById('mx-qsel');
+  sel.innerHTML = loadedQuarterIdxs().map(i =>
+    `<option value="${i}">${esc(quarters[i].label || ('Q'+(i+1)))}</option>`).join('');
+  updateMxBtn();
+}
+function mxPreset(kind) { setGridSelection('mx-grid', presetNames(kind)); }
+function mxSelectAll(on) { setGridSelection('mx-grid', on ? allFundNames.slice() : []); }
+function updateMxBtn() { document.getElementById('mx-run').disabled = mxSelected.size < 2; }
+
+function runOverlapMatrices() {
+  const qIdx = parseInt(document.getElementById('mx-qsel').value, 10);
+  const qLabel = quarters[qIdx]?.label || ('Q'+(qIdx+1));
+  const fmap = fundsInQuarter(qIdx);
+  const funds = [...mxSelected].filter(n => fmap.has(n)).sort((a,b)=>shortFundLabel(a).localeCompare(shortFundLabel(b)));
+  if (funds.length < 2) { setLog('mx-log', '⚠ Need at least 2 selected funds present in this quarter.', true); return; }
+  setLog('mx-log', `Computing matrices for ${funds.length} funds — ${qLabel}…`);
+
+  // aggregate each fund to borrower level, keyed by investee id / normalized name
+  const agg = {};
+  funds.forEach(n => {
+    const rows = aggregate(fmap.get(n).investments);
+    const m = new Map();
+    rows.forEach(r => m.set(r.investeeId || normName(r.company), r));
+    agg[n] = { map: m, totalFv: rows.reduce((s,r)=>s+r.fv,0), count: m.size };
+  });
+
+  const N = funds.length;
+  const fvPct = [], cnt = [], coPct = [];
+  for (let i = 0; i < N; i++) {
+    fvPct.push([]); cnt.push([]); coPct.push([]);
+    for (let j = 0; j < N; j++) {
+      if (i === j) { fvPct[i].push(null); cnt[i].push(null); coPct[i].push(null); continue; }
+      const A = agg[funds[i]], B = agg[funds[j]];
+      let sharedFv = 0, shared = 0;
+      A.map.forEach((row, k) => { if (B.map.has(k)) { shared++; sharedFv += row.fv; } });
+      fvPct[i].push(A.totalFv > 0 ? sharedFv / A.totalFv * 100 : 0);
+      cnt[i].push(shared);
+      coPct[i].push(A.count > 0 ? shared / A.count * 100 : 0);
+    }
+  }
+  mxLastResult = { funds, qLabel, fvPct, cnt, coPct };
+  renderMatrices(mxLastResult);
+  setLog('mx-log', `Done — ${funds.length} funds, ${qLabel}.`);
+}
+
+function renderMatrices({ funds, qLabel, fvPct, cnt, coPct }) {
+  const blocks = [
+    ['FV overlap as % of row fund', fvPct, v => v.toFixed(1) + '%'],
+    ['Number of overlapping companies', cnt, v => String(v)],
+    ['Overlapping companies as % of row fund', coPct, v => v.toFixed(1) + '%'],
+  ];
+  let html = `<div class="results-header"><div class="results-title">Overlap matrices — ${esc(qLabel)}</div></div>`;
+  blocks.forEach(([title, M, fmt]) => {
+    const flat = M.flat().filter(v => v != null && !isNaN(v));
+    const min = Math.min(...flat), max = Math.max(...flat);
+    html += `<div class="mx-block"><div class="mx-title">${esc(title)}</div><div class="mx-scroll"><table class="mx">
+      <thead><tr><th style="text-align:left;">Row fund</th>${funds.map(f=>`<th title="${esc(f)}">${esc(shortFundLabel(f))}</th>`).join('')}</tr></thead>
+      <tbody>${funds.map((rf,i)=>`<tr><th title="${esc(rf)}">${esc(shortFundLabel(rf))}</th>${
+        M[i].map(v => v==null
+          ? `<td class="diag">—</td>`
+          : `<td style="background:${heatColor(v,min,max)}">${fmt(v)}</td>`).join('')
+      }</tr>`).join('')}</tbody></table></div></div>`;
+  });
+  html += `<div class="mx-note">Conditional formatting is relative within each matrix: lower values are green, midpoint values are yellow, and higher values are red. Read each cell as row fund → column fund.</div>`;
+  document.getElementById('mx-results').innerHTML = html;
+}
+
+function exportMatricesExcel() {
+  if (!mxLastResult) { setLog('mx-log','⚠ Run the matrices first.', true); return; }
+  const { funds, qLabel, fvPct, cnt, coPct } = mxLastResult;
+  const wb = XLSX.utils.book_new();
+  const sheets = [['FV overlap %', fvPct], ['Overlap count', cnt], ['Overlap company %', coPct]];
+  sheets.forEach(([nm, M]) => {
+    const aoa = [['Row fund', ...funds.map(shortFundLabel)]];
+    funds.forEach((rf,i) => aoa.push([shortFundLabel(rf), ...M[i].map(v => v==null ? '' : Number(v.toFixed(2)))]));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), nm.slice(0,31));
+  });
+  XLSX.writeFile(wb, `BDC_Overlap_Matrices_${qLabel.replace(/\s+/g,'_')}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEVEL 3 DEBT
+// ═══════════════════════════════════════════════════════════════
+function initLevel3Tab() {
+  if (!l3Selected.size) presetNames('mswm').forEach(n => l3Selected.add(n));
+  buildFundGrid('l3-grid', l3Selected, 'l3-count', updateL3Btn);
+  l3Quarters = new Set(loadedQuarterIdxs());
+  renderL3Quarters();
+  renderL3Bands();
+  updateL3Btn();
+}
+function l3Preset(kind) { setGridSelection('l3-grid', presetNames(kind)); }
+function l3SelectAll(on) { setGridSelection('l3-grid', on ? allFundNames.slice() : []); }
+
+function renderL3Quarters() {
+  const row = document.getElementById('l3-qrow');
+  row.innerHTML = loadedQuarterIdxs().map(i =>
+    `<div class="q-chip${l3Quarters.has(i)?' on':''}" onclick="toggleL3Quarter(${i},this)">
+       <div class="fg-box">${l3Quarters.has(i)?'✓':''}</div>${esc(quarters[i].label || ('Q'+(i+1)))}
+     </div>`).join('');
+  document.getElementById('l3-qcount').textContent = `${l3Quarters.size} selected`;
+}
+function toggleL3Quarter(i, el) {
+  if (l3Quarters.has(i)) l3Quarters.delete(i); else l3Quarters.add(i);
+  renderL3Quarters(); updateL3Btn();
+}
+function l3AllQuarters(on) {
+  l3Quarters = on ? new Set(loadedQuarterIdxs()) : new Set();
+  renderL3Quarters(); updateL3Btn();
+}
+
+function renderL3Bands() {
+  const el = document.getElementById('l3-bands');
+  el.innerHTML = l3Bands.map((b,i) =>
+    `<div class="band-pill">
+       <input class="band-input" type="number" min="1" max="100" value="${b}" onchange="l3SetBand(${i}, this.value)">
+       <span class="band-unit">%</span>
+       <span class="band-x" onclick="l3RemoveBand(${i})">×</span>
+     </div>`).join('');
+  document.getElementById('l3-bandinfo').textContent =
+    `${l3Bands.length} band${l3Bands.length!==1?'s':''}: ${l3Bands.join(' / ')}`;
+  updateL3Btn();
+}
+function l3SetBand(i, v) {
+  const n = Math.max(1, Math.min(100, parseFloat(v) || 0));
+  l3Bands[i] = n; l3Bands = [...new Set(l3Bands)].sort((a,b)=>a-b); renderL3Bands();
+}
+function l3RemoveBand(i) { l3Bands.splice(i,1); renderL3Bands(); }
+function l3AddBand() {
+  const next = l3Bands.length ? Math.min(100, Math.max(...l3Bands) + 5) : 70;
+  if (!l3Bands.includes(next)) l3Bands.push(next);
+  l3Bands.sort((a,b)=>a-b); renderL3Bands();
+}
+function l3ResetBands() { l3Bands = [70,80,90]; renderL3Bands(); }
+function updateL3Btn() {
+  const btn = document.getElementById('l3-run');
+  if (btn) btn.disabled = !(l3Selected.size >= 1 && l3Quarters.size >= 1 && l3Bands.length >= 1);
+}
+
+function runLevel3Debt() {
+  const funds = [...l3Selected].sort((a,b)=>shortFundLabel(a).localeCompare(shortFundLabel(b)));
+  const qIdxs = [...l3Quarters].sort((a,b)=>b-a);   // newest-labelled first, matching the reference layout
+  const bands = [...l3Bands].sort((a,b)=>a-b);
+  setLog('l3-log', `Computing Level 3 debt for ${funds.length} fund(s) across ${qIdxs.length} quarter(s)…`);
+
+  let missingPTA = 0, total = 0;
+  const data = {};   // fund -> band -> qIdx -> pct
+  funds.forEach(f => {
+    data[f] = {};
+    bands.forEach(b => { data[f][b] = {}; });
+    qIdxs.forEach(qi => {
+      const fd = fundsInQuarter(qi).get(f);
+      bands.forEach(b => { data[f][b][qi] = fd ? 0 : null; });
+      if (!fd) return;
+      fd.investments.forEach(inv => {
+        total++;
+        let ratio = inv.fv_pct_cost;
+        if (ratio == null && inv.cost) ratio = inv.fair_value / inv.cost * 100;
+        if (ratio == null || isNaN(ratio) || ratio <= 0) return;
+        let pta = inv.pct_total_assets;
+        if (pta == null) { missingPTA++; return; }
+        bands.forEach(b => { if (ratio <= b) data[f][b][qi] += pta; });
+      });
+    });
+  });
+
+  l3LastResult = { funds, qIdxs, bands, data };
+  renderLevel3(l3LastResult);
+  setLog('l3-log', missingPTA
+    ? `Done. Note: ${missingPTA.toLocaleString()} of ${total.toLocaleString()} rows had no "% of Total Assets" value and were skipped.`
+    : `Done — ${funds.length} fund(s), ${qIdxs.length} quarter(s), bands ${bands.join(' / ')}.`);
+}
+
+function renderLevel3({ funds, qIdxs, bands, data }) {
+  const qLbl = i => quarters[i]?.label || ('Q'+(i+1));
+  let head1 = `<tr class="grp"><th style="text-align:left;border-left:none;"></th>`;
+  bands.forEach(b => { head1 += `<th colspan="${qIdxs.length}">FV % Cost ≤${b}%</th>`; });
+  head1 += `</tr>`;
+  let head2 = `<tr><th style="text-align:left;">Fund</th>`;
+  bands.forEach(() => qIdxs.forEach((qi,k) =>
+    head2 += `<th style="text-align:right;${k===0?'border-left:2px solid var(--border);':''}">${esc(qLbl(qi))}</th>`));
+  head2 += `</tr>`;
+
+  const body = funds.map(f => {
+    let tds = `<td class="fundcell" title="${esc(f)}">${esc(shortFundLabel(f))}</td>`;
+    bands.forEach(b => qIdxs.forEach((qi,k) => {
+      const v = data[f][b][qi];
+      tds += `<td class="${k===0?'grpstart':''}">${v==null ? '—' : v.toFixed(2)+'%'}</td>`;
+    }));
+    return `<tr>${tds}</tr>`;
+  }).join('');
+
+  document.getElementById('l3-results').innerHTML = `
+    <div class="table-wrap fade-up">
+      <div class="table-controls"><span class="table-count">Level 3 debt — cumulative % of total assets</span></div>
+      <div class="tbl-scroll"><table class="l3"><thead>${head1}${head2}</thead><tbody>${body}</tbody></table></div>
+    </div>
+    <div class="footnote">Calculation: filter BDC Name; retain rows where FV % of Cost is greater than 0 and less than or equal to each chosen cumulative band; sum % of Total Assets. Values are displayed as percentages without conditional formatting.</div>`;
+}
+
+function exportLevel3Excel() {
+  if (!l3LastResult) { setLog('l3-log','⚠ Run Level 3 Debt first.', true); return; }
+  const { funds, qIdxs, bands, data } = l3LastResult;
+  const qLbl = i => quarters[i]?.label || ('Q'+(i+1));
+  const h1 = ['Fund'], h2 = [''];
+  bands.forEach(b => qIdxs.forEach(qi => { h1.push(`FV % Cost <=${b}%`); h2.push(qLbl(qi)); }));
+  const aoa = [h1, h2];
+  funds.forEach(f => {
+    const r = [shortFundLabel(f)];
+    bands.forEach(b => qIdxs.forEach(qi => {
+      const v = data[f][b][qi];
+      r.push(v == null ? '' : Number(v.toFixed(4)));
+    }));
+    aoa.push(r);
+  });
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), 'Level 3 Debt');
+  XLSX.writeFile(wb, 'BDC_Level3_Debt.xlsx');
+}
+
+function clearChart() {
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  document.getElementById('chart-empty-state').style.display = 'flex';
+  document.getElementById('chart-wrap').style.display = 'none';
+  document.getElementById('chart-tbl-wrap').style.display = 'none';
+  document.getElementById('chart-title').textContent = 'FV / Par% by Fund — Quarterly';
+  document.getElementById('chart-sub').textContent = 'Select a company and funds, then click Plot Chart';
+  document.querySelectorAll('#chart-fund-cb-list .fund-cb-row').forEach(r => r.classList.remove('checked'));
+  document.querySelectorAll('#co-listbox .company-option').forEach(o => o.classList.remove('selected'));
+  document.getElementById('co-search').value = '';
+  filterCompanyList();
+  selectedChartCompany = null;
+  updateChartFundCount();
+  updatePlotBtn();
+}
+
+function exportChartExcel() {
+  if (!selectedChartCompany || !chartInstance) return;
+  const { display } = selectedChartCompany;
+  const loadedQs = quarters.map((q,i) => q ? {...q, idx:i} : null).filter(Boolean);
+  const qLabels = loadedQs.map(q => q.label || ('Q'+(q.idx+1)));
+  const datasets = chartInstance.data.datasets;
+  const wb = XLSX.utils.book_new();
+  const h = ['Fund', ...qLabels.flatMap(l=>[`${l} FV/Par%`,`${l} FV ($M)`])];
+  const rows = datasets.map(ds => [ds.label, ...ds.data.flatMap(v=>[v,null])]);
+  const ws = XLSX.utils.aoa_to_sheet([h,...rows]);
+  XLSX.utils.book_append_sheet(wb, ws, display.substring(0,31).replace(/[\\\/\?\*\[\]]/g,'_'));
+  XLSX.writeFile(wb, `BDC_Chart_${display.replace(/[^a-z0-9]/gi,'_').substring(0,40)}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DOWNLOAD TEMPLATE
+// ═══════════════════════════════════════════════════════════════
+async function loadSampleData() {
+  const btn = document.getElementById('load-sample-btn');
+  const oldText = btn.textContent;
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+  try {
+    const f1 = await fetch('sampledata/BDC_SOI_Input_2026-03-31_10Funds.xlsx').then(r => r.blob());
+    const file1 = new File([f1], 'BDC_SOI_Input_2026-03-31_10Funds.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    document.getElementById('ql-0').value = 'Q1 2026';
+    loadQ(0, file1);
+
+    const f2 = await fetch('sampledata/BDC_SOI_Input_2026-06-30_10Funds.xlsx').then(r => r.blob());
+    const file2 = new File([f2], 'BDC_SOI_Input_2026-06-30_10Funds.xlsx', { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    document.getElementById('ql-1').value = 'Q2 2026';
+    loadQ(1, file2);
+  } catch (err) {
+    setLog('scan-log', 'Failed to load sample data: ' + err.message, true);
+  } finally {
+    btn.textContent = oldText;
+    btn.disabled = false;
+  }
+}
+
+function downloadTemplate() {
+  const wb = XLSX.utils.book_new();
+  const headers = ['BDC Name','Normalize Name','Industry','Par Amount ($M)','Cost ($M)','Fair Value ($M)'];
+  const sample = [
+    ['Ares Capital Corp','Acme Industries LLC','Software','10.5','10.2','10.8'],
+    ['Ares Capital Corp','Beta Holdings Inc','Healthcare','5.0','4.9','4.7'],
+    ['Blue Owl Capital','Acme Industries LLC','Software','8.0','7.8','8.2'],
+    ['Blue Owl Capital','Gamma Services Ltd','Industrials','12.0','11.5','11.0'],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet([headers,...sample]);
+  ws['!cols'] = headers.map(h => ({wch: Math.max(h.length+2, 18)}));
+  XLSX.utils.book_append_sheet(wb, ws, 'SOI Template');
+  // Notes sheet
+  const notes = [
+    ['Column','Description','Required'],
+    ['BDC Name','The BDC fund name. All funds can be in one file.','Yes'],
+    ['Normalize Name','Standardized company/issuer name (legal suffixes stripped).','Yes'],
+    ['Industry','Industry or sector classification.','Recommended'],
+    ['Par Amount ($M)','Par value of the position in $M.','Recommended'],
+    ['Cost ($M)','Cost basis of the position in $M.','Optional'],
+    ['Fair Value ($M)','Fair value of the position in $M.','Yes'],
+    ['','',''],
+    ['Notes','One file can contain all BDCs — tool splits by BDC Name column.',''],
+    ['','Upload up to 4 quarterly files for trend analysis.',''],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(notes);
+  ws2['!cols'] = [{wch:22},{wch:60},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Instructions');
+  XLSX.writeFile(wb, 'BDC_SOI_Template.xlsx');
+}
+</script>
+</body>
+</html>
