@@ -20,7 +20,7 @@
 You do not need to download any files or know how to code to see this tool in action:
 
 1. **Open the App**  
-   Click the [Live Application Link](https://grishmagarg.github.io/bdc-credit-analytics).
+   Click the [Live Application Link](https://grishmagarg.github.io/BDC-Analytics-/dashboard.html).
 2. **Fetch Data**  
    Click the **⚡ Load Sample Data** button at the top of the page. This automatically loads two quarters of real-world sample data (~11,000+ loan records across 10 top private credit funds) into the tool.
 3. **Analyze**  
