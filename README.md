@@ -9,7 +9,7 @@
 
 ---
 
-### 🔗 **Live Application:** 
+### 🔗 **Live Application** 
 
 *(Runs 100% locally in your web browser — zero backend, no installations, no accounts required, and no data uploaded to external servers.)*
 
